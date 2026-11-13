@@ -1,0 +1,144 @@
+{
+ "plan": {
+  "T04": [
+   {
+    "action": "pickup",
+    "order": "O011"
+   },
+   {
+    "action": "delivery",
+    "order": "O011"
+   }
+  ]
+ },
+ "simulate": {
+  "total_km": 412,
+  "loaded_km": 300,
+  "empty_km": 112,
+  "total_cost": 889.92,
+  "total_co2": 490.28,
+  "orders_fulfilled": 1,
+  "orders_total": 50,
+  "value_fulfilled": 1.5,
+  "value_lost_to_lateness": 0,
+  "value_total": 59,
+  "truck_utilization": 0.0789,
+  "orders_late": 0,
+  "orders_too_late": 0,
+  "total_late_min": 0,
+  "penalized_late_min": 0,
+  "trucks": [
+   {
+    "truck": "T04",
+    "route": [
+     "C014",
+     "C008",
+     "C018"
+    ],
+    "total_km": 412,
+    "loaded_km": 300,
+    "empty_km": 112,
+    "cost": 889.92,
+    "co2": 490.28,
+    "max_load_kg": 2600,
+    "utilization": 0.0789,
+    "finish_min": 468,
+    "driving_min": 354,
+    "break_and_rest_min": 0,
+    "schedule": [
+     {
+      "action": "pickup",
+      "order": "O011",
+      "city": "C008",
+      "arrival_min": 96,
+      "wait_min": 54,
+      "late_min": 0,
+      "departure_min": 180
+     },
+     {
+      "action": "delivery",
+      "order": "O011",
+      "city": "C018",
+      "arrival_min": 438,
+      "wait_min": 0,
+      "late_min": 0,
+      "departure_min": 468
+     }
+    ]
+   }
+  ]
+ },
+ "score": {
+  "scenario": "scenario_middle",
+  "score": 320.19,
+  "breakdown": {
+   "fulfillment": 2.54,
+   "cost_efficiency": 51.35,
+   "loaded_ratio": 72.82,
+   "co2_efficiency": 63.7,
+   "penalty": 0,
+   "late_penalty": 0
+  },
+  "metrics": {
+   "total_km": 412,
+   "loaded_km": 300,
+   "empty_km": 112,
+   "total_cost": 889.92,
+   "total_co2": 490.28,
+   "orders_fulfilled": 1,
+   "orders_total": 50,
+   "value_fulfilled": 1.5,
+   "value_lost_to_lateness": 0,
+   "value_total": 59,
+   "truck_utilization": 0.0789,
+   "orders_late": 0,
+   "orders_too_late": 0,
+   "total_late_min": 0,
+   "penalized_late_min": 0,
+   "trucks": [
+    {
+     "truck": "T04",
+     "route": [
+      "C014",
+      "C008",
+      "C018"
+     ],
+     "total_km": 412,
+     "loaded_km": 300,
+     "empty_km": 112,
+     "cost": 889.92,
+     "co2": 490.28,
+     "max_load_kg": 2600,
+     "utilization": 0.0789,
+     "finish_min": 468,
+     "driving_min": 354,
+     "break_and_rest_min": 0,
+     "schedule": [
+      {
+       "action": "pickup",
+       "order": "O011",
+       "city": "C008",
+       "arrival_min": 96,
+       "wait_min": 54,
+       "late_min": 0,
+       "departure_min": 180
+      },
+      {
+       "action": "delivery",
+       "order": "O011",
+       "city": "C018",
+       "arrival_min": 438,
+       "wait_min": 0,
+       "late_min": 0,
+       "departure_min": 468
+      }
+     ]
+    }
+   ]
+  },
+  "validation": {
+   "is_valid": true,
+   "violations": []
+  }
+ }
+}

@@ -70,6 +70,22 @@ def _tw(d: dict | None) -> TimeWindow | None:
     return TimeWindow(d["from"], d["to"]) if d else None
 
 
+def scenario_from_dict(scenario_id: str, raw: dict, fingerprint: str = "") -> Scenario:
+    """Build a Scenario from raw API json (keys: cities, trucks, orders, distance_matrix)."""
+    cities = {c["id"]: City(c["id"], c["name"], c["country"], c["latitude"], c["longitude"])
+              for c in raw["cities"]}
+    trucks = {t["id"]: Truck(t["id"], t["start_city"], t["capacity_kg"], t["type"],
+                             t["cost_per_km"], t["co2_per_km"]) for t in raw["trucks"]}
+    orders = {o["id"]: Order(o["id"], o["pickup_city"], o["delivery_city"], o["weight_kg"],
+                             o.get("required_truck_type"), _tw(o.get("pickup_window")),
+                             _tw(o.get("delivery_window")), float(o["value"])) for o in raw["orders"]}
+    matrix = raw["distance_matrix"]
+    ids = sorted(matrix)
+    idx = {cid: i for i, cid in enumerate(ids)}
+    dist = np.array([[matrix[a][b] for b in ids] for a in ids], dtype=float)
+    return Scenario(scenario_id, cities, trucks, orders, dist, idx, fingerprint)
+
+
 def load_scenario(scenario_id: str, data_dir: Path = DATA_DIR) -> Scenario:
     folder = data_dir / scenario_id
     if not folder.exists():
@@ -78,19 +94,7 @@ def load_scenario(scenario_id: str, data_dir: Path = DATA_DIR) -> Scenario:
     def read(name: str):
         return json.loads((folder / f"{name}.json").read_text())
 
-    cities = {c["id"]: City(c["id"], c["name"], c["country"], c["latitude"], c["longitude"])
-              for c in read("cities")}
-    trucks = {t["id"]: Truck(t["id"], t["start_city"], t["capacity_kg"], t["type"],
-                             t["cost_per_km"], t["co2_per_km"]) for t in read("trucks")}
-    orders = {o["id"]: Order(o["id"], o["pickup_city"], o["delivery_city"], o["weight_kg"],
-                             o.get("required_truck_type"), _tw(o.get("pickup_window")),
-                             _tw(o.get("delivery_window")), float(o["value"])) for o in read("orders")}
-
-    matrix = read("distance_matrix")
-    ids = sorted(matrix)
-    idx = {cid: i for i, cid in enumerate(ids)}
-    dist = np.array([[matrix[a][b] for b in ids] for a in ids], dtype=float)
-
+    raw = {k: read(k) for k in ("cities", "trucks", "orders", "distance_matrix")}
     meta_file = folder / "meta.json"
     fp = json.loads(meta_file.read_text()).get("fingerprint", "") if meta_file.exists() else ""
-    return Scenario(scenario_id, cities, trucks, orders, dist, idx, fp)
+    return scenario_from_dict(scenario_id, raw, fp)

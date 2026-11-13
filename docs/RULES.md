@@ -78,7 +78,15 @@ Order value: normal 1.0 · refrigerated 1.5 · hazmat 1.5 · +0.5 if it has a pi
 - Server restart regenerates all scenarios -> always fetch fresh data (`scripts/fetch_data.py` warns on change).
 - Organizers may publish additional final scenarios during the event.
 
-## 7. Open questions (verify against API responses in tests/fixtures/)
-- Exact break/rest placement: mid-leg or only at stops? Does the counter reset after a rest?
-- Does waiting before a time window count toward the 45-min break rule exactly as service does?
-- Rounding of reported cost/CO2 and of the score components.
+## 7. Verified against the API (tests/fixtures/, 29 recorded responses)
+- Break (270 -> 45) and rest (540 -> 660) are inserted **mid-leg**; a rest also resets the break counter.
+- Off-driving time between two legs (waiting + 30-min services, summed over same-city stops) of
+  >= 45 min counts as a break. If a pause falls due exactly at arrival, that stop's off time counts toward it.
+- Rejected (capacity) pickups are not driven to. `truck_type_mismatch` is flagged on the pickup and on a
+  delivery-before-pickup, not on a duplicate pickup.
+- Lateness value `value * (1 - 0.5 * late/60)` uses the max lateness of the order's stops; pickup lateness counts
+  too. > 60 min on any stop -> not fulfilled. Values are not rounded to 2 decimals.
+- `total_late_min` = sum over all executed stops; `penalized_late_min` = lateness of fulfilled late orders.
+- `truck_utilization` = km-weighted mean of per-truck `sum(load*km)/(capacity*km)`.
+- `late_penalty` in the breakdown is informational: `5 * 100 * value_lost / value_total` (already in fulfillment).
+- Still assumed, not probed: off time >= 660 resets the daily driving counter; both stops late at once.

@@ -1,0 +1,144 @@
+{
+ "plan": {
+  "T08": [
+   {
+    "action": "pickup",
+    "order": "O109"
+   },
+   {
+    "action": "delivery",
+    "order": "O109"
+   }
+  ]
+ },
+ "simulate": {
+  "total_km": 1019,
+  "loaded_km": 714,
+  "empty_km": 305,
+  "total_cost": 1630.4,
+  "total_co2": 1120.9,
+  "orders_fulfilled": 1,
+  "orders_total": 120,
+  "value_fulfilled": 1.075,
+  "value_lost_to_lateness": 0.425,
+  "value_total": 145,
+  "truck_utilization": 0.0555,
+  "orders_late": 1,
+  "orders_too_late": 0,
+  "total_late_min": 34,
+  "penalized_late_min": 34,
+  "trucks": [
+   {
+    "truck": "T08",
+    "route": [
+     "C109",
+     "C025",
+     "C250"
+    ],
+    "total_km": 1019,
+    "loaded_km": 714,
+    "empty_km": 305,
+    "cost": 1630.4,
+    "co2": 1120.9,
+    "max_load_kg": 1900,
+    "utilization": 0.0555,
+    "finish_min": 1684,
+    "driving_min": 874,
+    "break_and_rest_min": 750,
+    "schedule": [
+     {
+      "action": "pickup",
+      "order": "O109",
+      "city": "C025",
+      "arrival_min": 262,
+      "wait_min": 0,
+      "late_min": 0,
+      "departure_min": 292
+     },
+     {
+      "action": "delivery",
+      "order": "O109",
+      "city": "C250",
+      "arrival_min": 1654,
+      "wait_min": 0,
+      "late_min": 34,
+      "departure_min": 1684
+     }
+    ]
+   }
+  ]
+ },
+ "score": {
+  "scenario": "scenario_big",
+  "score": 434.55,
+  "breakdown": {
+   "fulfillment": 0.74,
+   "cost_efficiency": 91.24,
+   "loaded_ratio": 70.07,
+   "co2_efficiency": 95.51,
+   "penalty": 0,
+   "late_penalty": 1.47
+  },
+  "metrics": {
+   "total_km": 1019,
+   "loaded_km": 714,
+   "empty_km": 305,
+   "total_cost": 1630.4,
+   "total_co2": 1120.9,
+   "orders_fulfilled": 1,
+   "orders_total": 120,
+   "value_fulfilled": 1.075,
+   "value_lost_to_lateness": 0.425,
+   "value_total": 145,
+   "truck_utilization": 0.0555,
+   "orders_late": 1,
+   "orders_too_late": 0,
+   "total_late_min": 34,
+   "penalized_late_min": 34,
+   "trucks": [
+    {
+     "truck": "T08",
+     "route": [
+      "C109",
+      "C025",
+      "C250"
+     ],
+     "total_km": 1019,
+     "loaded_km": 714,
+     "empty_km": 305,
+     "cost": 1630.4,
+     "co2": 1120.9,
+     "max_load_kg": 1900,
+     "utilization": 0.0555,
+     "finish_min": 1684,
+     "driving_min": 874,
+     "break_and_rest_min": 750,
+     "schedule": [
+      {
+       "action": "pickup",
+       "order": "O109",
+       "city": "C025",
+       "arrival_min": 262,
+       "wait_min": 0,
+       "late_min": 0,
+       "departure_min": 292
+      },
+      {
+       "action": "delivery",
+       "order": "O109",
+       "city": "C250",
+       "arrival_min": 1654,
+       "wait_min": 0,
+       "late_min": 34,
+       "departure_min": 1684
+      }
+     ]
+    }
+   ]
+  },
+  "validation": {
+   "is_valid": true,
+   "violations": []
+  }
+ }
+}

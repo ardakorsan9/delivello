@@ -23,6 +23,7 @@ URL options (append to the address):
 | `?tour=1` | all four scenarios, 2:00 in total (18 + 22 + 35 + 45 s) |
 | `?scenario=scenario_big&duration=45` | one scenario, played in 45 s |
 | `&clean=1` | hide the control bar (for recording) |
+| `&fps=1` | show the frame rate in the top-right corner (should be ~60) |
 
 Keys: Space play/pause · ←/→ seek · 1–4 scenario · T tour · R restart · H hide controls.
 

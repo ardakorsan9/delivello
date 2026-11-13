@@ -8,6 +8,7 @@ const TOUR = { scenario_small: 18, scenario_middle: 22, scenario_big: 35, scenar
 const TITLE_S = 1.6;        // title card at the start of each tour step
 const CSS = getComputedStyle(document.documentElement);
 const C = (n) => CSS.getPropertyValue(n).trim();
+const COL = { muted: C("--muted"), brk: C("--break"), rst: C("--rest"), score: C("--score") };  // read once
 
 const DATA = window.NOS_DATA || {};
 const scenarios = ORDER.filter((s) => DATA[s]);
@@ -18,6 +19,20 @@ if (params.get("clean") === "1") document.body.classList.add("clean");
 const img = {};
 for (const n of ["standard", "refrigerated", "hazmat"]) { img[n] = new Image(); img[n].src = `assets/truck_${n}.svg`; }
 img.cargo = new Image(); img.cargo.src = "assets/cargo.svg";
+// SVGs are rasterised once into bitmaps: drawing an SVG <img> every frame is slow in browsers
+const sprite = {};
+function sprites(L) {
+  const H = L / 2, sc = 2 * (window.devicePixelRatio || 1);
+  for (const [k, w, h] of [["standard", L, H], ["refrigerated", L, H], ["hazmat", L, H], ["cargo", H * 0.9, H * 0.9]]) {
+    const im = img[k];
+    if (!im.complete || !im.naturalWidth) { sprite[k] = null; continue; }
+    const c = document.createElement("canvas");
+    c.width = Math.ceil(w * sc); c.height = Math.ceil(h * sc);
+    c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+    sprite[k] = c;
+  }
+}
+for (const k of Object.keys(img)) img[k].onload = () => S && sprites(S.truckSize);
 
 // ---------------------------------------------------------------- geometry
 const canvas = document.getElementById("map");
@@ -121,10 +136,8 @@ function lerp(city, s, f) { return pointAt(getPath(city, s.from, s.to), f); }
 function line(g, city, s, f0, f1) {
   const p = getPath(city, s.from, s.to), a = pointAt(p, f0), b = pointAt(p, f1);
   g.beginPath(); g.moveTo(a[0], a[1]);
-  for (let i = 1; i < p.pts.length - 1; i++) {
-    const r = p.cum[i] / p.L;
-    if (r > f0 && r < f1) g.lineTo(p.pts[i][0], p.pts[i][1]);
-  }
+  const i1 = Math.min(p.pts.length - 1, upper(p.cum, f1 * p.L));
+  for (let i = upper(p.cum, f0 * p.L); i < i1; i++) g.lineTo(p.pts[i][0], p.pts[i][1]);  // only interior points
   g.lineTo(b[0], b[1]); g.stroke();
 }
 function upper(arr, x) { let lo = 0, hi = arr.length; while (lo < hi) { const m = (lo + hi) >> 1; arr[m] <= x ? lo = m + 1 : hi = m; } return lo; }
@@ -171,7 +184,7 @@ function draw(S, t) {
         if (b <= a) continue;
         const fr = (x) => s.f0 + (s.f1 - s.f0) * (x - s.start) / Math.max(1, s.end - s.start);
         ctx.globalAlpha = Math.max(0, 1 - (t - b) / TRAIL);
-        ctx.strokeStyle = s.loaded ? tr.color : C("--muted");
+        ctx.strokeStyle = s.loaded ? tr.color : COL.muted;
         ctx.setLineDash(s.loaded ? [] : [6, 6]);
         line(ctx, S.city, s, fr(a), fr(b));
       }
@@ -202,29 +215,34 @@ function drawTruck(S, tr, st) {
   ctx.translate(st.xy[0], st.xy[1]);
   ctx.globalAlpha = st.kind === "parked" ? 0.35 : st.done ? 0.6 : 1;
   if (st.kind === "break" || st.kind === "rest") {
-    ctx.strokeStyle = st.kind === "break" ? C("--break") : C("--rest");
+    ctx.strokeStyle = st.kind === "break" ? COL.brk : COL.rst;
     ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, L * 0.62, 0, 7); ctx.stroke();
   }
   ctx.rotate(st.heading);
-  if (st.loaded && img.cargo.complete) ctx.drawImage(img.cargo, -L * 0.5 - Hh * 0.9, -Hh * 0.45, Hh * 0.9, Hh * 0.9);
+  if (st.loaded && sprite.cargo) ctx.drawImage(sprite.cargo, -L * 0.5 - Hh * 0.9, -Hh * 0.45, Hh * 0.9, Hh * 0.9);
   ctx.fillStyle = tr.color;                       // colour tag identifying the truck
   ctx.fillRect(-L / 2, -Hh / 2 - 4, L, 3);
-  const im = img[tr.type] || img.standard;
-  if (im.complete) ctx.drawImage(im, -L / 2, -Hh / 2, L, Hh);
+  const sp = sprite[tr.type] || sprite.standard;
+  if (sp) ctx.drawImage(sp, -L / 2, -Hh / 2, L, Hh);
   ctx.restore();
 }
 
+let sparkKey = "";
 function drawSpark(S, frac) {
   const c = document.getElementById("spark"), g = c.getContext("2d"), h = S.d.search_history;
+  const key = S.sid + ":" + (h ? Math.floor(h.length * frac) : -1);
+  if (key === sparkKey) return;          // nothing new to draw
+  sparkKey = key;
   g.clearRect(0, 0, c.width, c.height);
-  if (!h || h.length < 2) { g.fillStyle = C("--muted"); g.font = "13px system-ui"; g.fillText("no search history for this scenario", 4, 46); return; }
-  const lo = Math.min(...h.map((p) => p.best)), hi = Math.max(...h.map((p) => p.best)), T = h[h.length - 1].t || 1;
+  if (!h || h.length < 2) { g.fillStyle = COL.muted; g.font = "13px system-ui"; g.fillText("no search history for this scenario", 4, 46); return; }
+  S.sparkRange ||= [Math.min(...h.map((p) => p.best)), Math.max(...h.map((p) => p.best))];
+  const [lo, hi] = S.sparkRange, T = h[h.length - 1].t || 1;
   const X = (p) => 4 + (c.width - 8) * p.t / T, Y = (v) => c.height - 14 - (c.height - 28) * (v - lo) / Math.max(1e-6, hi - lo);
-  g.strokeStyle = C("--score"); g.lineWidth = 2; g.beginPath();
+  g.strokeStyle = COL.score; g.lineWidth = 2; g.beginPath();
   const upto = Math.max(1, Math.floor(h.length * frac));
   h.slice(0, upto).forEach((p, i) => i ? g.lineTo(X(p), Y(p.best)) : g.moveTo(X(p), Y(p.best)));
   g.stroke();
-  g.fillStyle = C("--muted"); g.font = "11px system-ui";
+  g.fillStyle = COL.muted; g.font = "11px system-ui";
   g.fillText(lo.toFixed(2), 4, c.height - 2); g.fillText(hi.toFixed(2), c.width - 50, 11);
 }
 
@@ -244,9 +262,11 @@ function sidePanel(S) {
 let S = null, sid = null, duration = 45, t0 = performance.now(), played = 0, playing = true, tour = null;
 const $ = (id) => document.getElementById(id);
 const fmt = (x) => Math.round(x).toLocaleString("en-US");
+const shown = {};
+function setText(id, v) { if (shown[id] !== v) { shown[id] = v; $(id).textContent = v; } }  // avoid per-frame DOM writes
 
 function load(id) {
-  sid = id; S = prepare(id); sidePanel(S); $("s-scen").value = id;
+  sid = id; S = prepare(id); sprites(S.truckSize); sidePanel(S); $("s-scen").value = id;
   $("k-scen").textContent = `${LABEL[id]} · ${S.d.trucks.length} trucks · ${S.d.orders.length} orders`;
   $("k-score").textContent = S.d.kpis.score.toFixed(2);
 }
@@ -276,12 +296,26 @@ function render(frac) {
   const t = frac * S.horizon;
   const { km, em } = draw(S, t);
   const day = 1 + Math.floor((t + 360) / 1440), mm = Math.floor(t + 360) % 1440;
-  $("k-clock").textContent = `Day ${day} · ${String(Math.floor(mm / 60)).padStart(2, "0")}:${String(mm % 60).padStart(2, "0")}`;
-  $("k-deliv").textContent = `${upper(S.deliveries, t)} / ${S.d.orders.length}`;
-  $("k-km").textContent = fmt(km);
-  $("k-empty").textContent = km ? `${(100 * em / km).toFixed(1)} %` : "–";
-  $("seek").value = Math.round(frac * 1000);
+  setText("k-clock", `Day ${day} · ${String(Math.floor(mm / 60)).padStart(2, "0")}:${String(mm % 60).padStart(2, "0")}`);
+  setText("k-deliv", `${upper(S.deliveries, t)} / ${S.d.orders.length}`);
+  setText("k-km", fmt(km));
+  setText("k-empty", km ? `${(100 * em / km).toFixed(1)} %` : "–");
+  const sv = String(Math.round(frac * 1000));
+  if (shown.seek !== sv) { shown.seek = sv; $("seek").value = sv; }
+  if (FPS) drawFps();
   drawSpark(S, frac);
+}
+
+// optional frame-rate readout: ?fps=1
+const FPS = params.get("fps") === "1";
+let fpsT = performance.now(), fpsN = 0, fpsV = 0;
+function drawFps() {
+  fpsN++;
+  const now = performance.now();
+  if (now - fpsT >= 500) { fpsV = (1000 * fpsN) / (now - fpsT); fpsN = 0; fpsT = now; }
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.fillStyle = "#ffffff"; ctx.font = "14px system-ui"; ctx.textBaseline = "top";
+  ctx.fillText(`${fpsV.toFixed(0)} fps`, W - 70, 10);
 }
 
 function resize() {

@@ -16,3 +16,6 @@ results/
 Thumbs.db
 .vscode/
 .idea/
+
+# generated demo data (scripts/build_web.py); the basemap web/data/europe.js is committed
+web/data/scenario_*.js

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- red delivery box drawn behind a loaded truck; replace with the designer's file (same name) -->
+  <rect x="3" y="3" width="26" height="26" rx="4" fill="#e5484d" stroke="#0b1020" stroke-width="2"/>
+  <path d="M3 12 H29 M16 3 V29" stroke="#ffd2d3" stroke-width="2" opacity="0.8"/>
+</svg>

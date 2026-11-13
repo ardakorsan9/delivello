@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NOS Dispatch Replay</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header id="kpis">
+  <div class="brand"><b>NOS</b><span>Ride or Deliver</span></div>
+  <div class="kpi"><label>Scenario</label><b id="k-scen">–</b></div>
+  <div class="kpi"><label>Clock</label><b id="k-clock">–</b></div>
+  <div class="kpi"><label>Delivered</label><b id="k-deliv">–</b></div>
+  <div class="kpi"><label>Km driven</label><b id="k-km">–</b></div>
+  <div class="kpi"><label>Empty km</label><b id="k-empty">–</b></div>
+  <div class="kpi score"><label>Score <small>API-verified</small></label><b id="k-score">–</b></div>
+</header>
+
+<main>
+  <canvas id="map"></canvas>
+  <div id="title-card" class="hidden"><div><h1 id="tc-title"></h1><p id="tc-sub"></p></div></div>
+  <aside id="side">
+    <section>
+      <h3>From naive to optimised</h3>
+      <div id="stages"></div>
+    </section>
+    <section>
+      <h3>How close to the best possible?</h3>
+      <div id="bound"></div>
+    </section>
+    <section>
+      <h3>Search progress <small>ALNS best score</small></h3>
+      <canvas id="spark" width="320" height="90"></canvas>
+    </section>
+    <section class="legend">
+      <h3>Legend</h3>
+      <div><img src="assets/truck_standard.svg" alt=""> standard</div>
+      <div><img src="assets/truck_refrigerated.svg" alt=""> refrigerated</div>
+      <div><img src="assets/truck_hazmat.svg" alt=""> hazmat</div>
+      <div><img src="assets/cargo.svg" alt="" class="sq"> cargo on board</div>
+      <div><i class="ring brk"></i> break 45 min <i class="ring rst"></i> daily rest 11 h</div>
+      <div><i class="line solid"></i> loaded km <i class="line dash"></i> empty km</div>
+    </section>
+  </aside>
+</main>
+
+<footer id="controls">
+  <button id="b-play" title="Space">⏯</button>
+  <input id="seek" type="range" min="0" max="1000" value="0">
+  <select id="s-scen"></select>
+  <select id="s-dur">
+    <option value="20">20 s</option><option value="30">30 s</option><option value="45" selected>45 s</option>
+    <option value="60">60 s</option><option value="120">120 s</option>
+  </select>
+  <button id="b-tour" title="T: all four scenarios in 2 minutes">Tour 2:00</button>
+  <span class="hint">Space play · ←/→ seek · 1–4 scenario · T tour · R restart · H hide controls</span>
+</footer>
+
+<script src="data/europe.js"></script>
+<script src="data/scenario_small.js"></script>
+<script src="data/scenario_middle.js"></script>
+<script src="data/scenario_big.js"></script>
+<script src="data/scenario_competitive.js"></script>
+<script src="player.js"></script>
+</body>
+</html>

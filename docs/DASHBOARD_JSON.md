@@ -82,6 +82,10 @@ Time: all minutes count from **minute 0 = Day 1, 06:00**. Day/clock for a minute
   - `wait` / `service`: it is in `city`.
   - Before its first segment the truck is at `start_city`; after its last one, at the last stop's city.
 - Distances are approximate road km (great-circle × 1.3), so straight lines between cities are the honest drawing.
+- **Cargo:** every segment has `loaded` (at least one order on board) and `load_kg`. Draw the red
+  delivery box behind the truck while `loaded` is true; this also holds during break/rest/wait/service.
+  For a `service` segment the values are the load *before* that pickup/delivery, so the box appears
+  right after a pickup's service and disappears after the last delivery's service.
 - Gantt colours by `kind`: drive (`loaded` true/false can be two shades), service, wait, break, rest.
 - `search_history.best` only rises. Plot it against `t` (seconds) for the "nitro tank" chart.
 - Example numbers above are illustrative. Always read the real file.

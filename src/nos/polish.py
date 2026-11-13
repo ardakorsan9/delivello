@@ -86,3 +86,4 @@ def set_partition(m: Model, pool: dict[int, set], incumbent: Insertion, rounds: 
             break
         lam = new_lam
     return best
+

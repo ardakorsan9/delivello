@@ -22,8 +22,9 @@ def truck_timeline(sc: Scenario, tid: str, stops: list[dict]) -> list[dict]:
     seg: list[dict] = []
 
     def add(kind, start, end, **kw):
-        if end > start:
-            seg.append({"kind": kind, "start": start, "end": end, **kw})
+        if end > start:  # every segment says whether cargo is on board (red box in the video)
+            seg.append({"kind": kind, "start": start, "end": end, "loaded": bool(on_board),
+                        "load_kg": load, **kw})
 
     for st in stops:
         o = sc.orders[st["order"]]
@@ -47,8 +48,7 @@ def truck_timeline(sc: Scenario, tid: str, stops: list[dict]) -> list[dict]:
                 off = 0
                 step = min(total - done, BREAK_AFTER - cont, REST_AFTER - daily)
                 add("drive", now, now + step, **{"from": city, "to": target, "f0": done / total,
-                                                 "f1": (done + step) / total, "km": km * step / total,
-                                                 "loaded": bool(on_board), "load_kg": load})
+                                                 "f1": (done + step) / total, "km": km * step / total})
                 now += step
                 cont += step
                 daily += step

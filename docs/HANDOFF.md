@@ -96,6 +96,11 @@ commands step by step. Rules reference: [RULES.md](RULES.md). Literature: [RESEA
   assignments with shorter first legs.
 - Before/after (dashboard stages): competitive 480.6 (naive) -> 931.0 (chessboard) -> 932.2 (final).
 
+- Q&A sheet with every number and its source: [QA.md](QA.md). Only one late stop in all plans
+  (competitive O055, 6 min, needed: without lateness at most 41 window orders fit).
+- Feature freeze (Arda, 2026-11-13 night): no new optimiser features. Remaining work = demo video:
+  truck images from the designer + `dashboard.json` routes; red cargo box while `loaded` is true.
+
 ## Next step
 1. Web dashboard reading `dashboard.json` (designer's Figma, offline page), then record the demo video.
 2. Optional: chessboard tie-break on first-leg empty km; longer ALNS + polish runs.

@@ -19,7 +19,6 @@ from .data import Scenario
 from .simulator import (BREAK_AFTER, BREAK_MIN, LATE_GRACE_MIN, REST_AFTER, REST_MIN,
                         SERVICE_MIN, SPEED_KMH, WEIGHTS)
 
-INF = 10**9
 Stop = tuple[int, bool]  # (order index, is_pickup)
 
 

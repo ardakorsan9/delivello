@@ -102,6 +102,22 @@ The bound assumes $R = 100$ (no empty km at all). A tighter bound would need a l
 first legs, which depends on which trucks serve the window orders. This is a possible next step (relax the
 same packing with the first-leg km in the objective).
 
+## 8. Why the remaining empty km is structural
+All empty km of the best plans are **first legs** (start city to first pickup). There are zero empty km
+between orders. For every truck with an empty first leg we tried to start it with an order picked up in
+its own start city: taken from any truck or unserved, with its delivery at every later position, and
+checked exactly. Not one such move is feasible:
+
+| Scenario | Truck | Empty first leg | Compatible orders starting in its city | Feasible |
+|---|---|---|---|---|
+| middle | T01 / T02 | 69 / 284 km | 0 / 2 | 0 / 0 |
+| big | T03 / T13 | 264 / 265 km | 0 / 0 | — |
+| competitive | T03 / T05 / T14 / T17 / T22 | 175 / 308 / 308 / 521 / 157 km | 3 / 4 / 3 / 4 / 0 | 0 |
+
+Every candidate makes one of that truck's time-window stops more than 60 min late. These trucks are the
+ones that must serve window orders (the chessboard assignment), so they have to drive straight there.
+The remaining gap to the bound is geography and time, not search.
+
 References: A. M. Geoffrion, "Lagrangean relaxation for integer programming", *Math. Programming Study* 2
 (1974); M. Held, R. M. Karp, "The traveling-salesman problem and minimum spanning trees: part II",
 *Math. Programming* 1 (1971); M. L. Fisher, "The Lagrangian relaxation method for solving integer programming

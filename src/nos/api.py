@@ -55,11 +55,6 @@ class GruberAPI:
             raise RuntimeError("GRUBER_API_KEY is not set. Copy .env.example to .env and fill it in.")
         return {"X-Api-Key": self.api_key}
 
-    def team(self) -> dict:
-        r = self.session.get(f"{self.base_url}/Team", headers=self._headers(), timeout=TIMEOUT_S)
-        r.raise_for_status()
-        return r.json()
-
     def register_team(self, name: str) -> dict:
         r = self.session.post(f"{self.base_url}/Team/Register", json={"name": name},
                               headers=self._headers(), timeout=TIMEOUT_S)

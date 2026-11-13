@@ -1,4 +1,4 @@
-"""Check that the API key in .env works and show team info and limits.
+"""Check that the API key in .env works (uses the unlimited Validate endpoint).
 
 Usage:  uv run python scripts/check_team.py
         uv run python scripts/check_team.py --register "NOS"
@@ -21,9 +21,11 @@ def main() -> None:
 
     api = GruberAPI()
     try:
+        plan = api.sample_plan("scenario_small")
+        result = api.validate("scenario_small", plan)
+        print("API key OK - validate on scenario_small:", json.dumps(result))
         if args.register:
             print("register:", json.dumps(api.register_team(args.register), indent=1))
-        print("team:", json.dumps(api.team(), indent=1))
     except requests.HTTPError as e:
         print(f"HTTP {e.response.status_code}: {e.response.text}")
 

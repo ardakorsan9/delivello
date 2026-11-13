@@ -43,7 +43,8 @@ def main() -> None:
         plan = entry["plan"]
     else:
         data = load_plan(Path(args.plan))
-        plan = data["plan"] if "plan" in data and "meta" in data else data
+        # accept a bare plan, an archive entry {"meta", "plan"} or a fixture {"plan", ...}
+        plan = data["plan"] if isinstance(data.get("plan"), dict) else data
 
     limited = args.kind in ("simulate", "score") and args.scenario in LIMITED_SCENARIOS
     if limited:

@@ -44,8 +44,8 @@ brings. The plan is optimised on the official score, so it leaves O044 out.
 **How do you know your simulator matches the API?** It reproduces all 29 recorded API responses
 exactly: every stop's arrival and departure minute, km, cost, CO2, violations and score. 14 of those 29
 were probes designed to separate competing rule interpretations (break placement, lateness value).
-The final middle and big plans were also simulated by the API: identical down to every stop's minute
-(19 trucks, 328 stops).
+The final middle, big and competitive plans were also simulated by the API: identical down to every
+stop's minute (43 trucks, 686 stops), so our competitive score 932.22 is the API's number too.
 
 **Algorithm in one breath?** An exact simulator; a CP-SAT "chessboard" for the time-window orders;
 regret insertion; ALNS (Ropke & Pisinger 2006) on the official score in 4 parallel processes, with the

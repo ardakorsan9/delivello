@@ -4,10 +4,10 @@ from pathlib import Path
 
 import pytest
 
-from nos.bounds import window_bound
 from nos.chessboard import solve
 from nos.data import scenario_from_dict
 from nos.evaluate import Model
+from nos.lagrange import lagrangian_bound
 from nos.simulator import simulate
 from nos.timeline import check_against, truck_timeline
 
@@ -22,11 +22,10 @@ def scen(name):
 def test_chessboard_valid_and_within_bound(name):
     sc = scen(name)
     m = Model(sc)
-    b = window_bound(m)
-    r = solve(m, b["conflict_list"], keep=30, verbose=False)
+    r = solve(m, verbose=False)
     res = simulate(sc, m.to_plan(r.plan.routes))
     assert res.violations == [] and r.status == "OPTIMAL" and not r.truncated_trucks
-    assert r.window_served <= b["max_served"]
+    assert res.score <= lagrangian_bound(m).score_ub + 1e-6
     served = {s["order"] for t in res.trucks for s in t["schedule"]}
     # an unserved order without a window is always *feasible*: append it to a compatible
     # truck's route (it may still be left out because it lowers the score)

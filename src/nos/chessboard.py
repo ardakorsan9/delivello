@@ -13,8 +13,9 @@ inserted afterwards by regret insertion.
    the served value (lateness-scaled), with a tiny km tie-break.
 3. The chosen window routes seed a plan; all other orders are inserted by regret.
 
-`bounds.window_bound` gives the matching upper bound; if both agree, the window
-part is optimal (up to the break-credit caveat described there).
+`lagrange.py` turns the same columns into a Lagrangian upper bound
+(docs/UPPER_BOUND.md); the enumeration is complete for all scenarios, so the
+window part is optimal up to the break-credit caveat described there.
 """
 
 from __future__ import annotations
@@ -43,8 +44,8 @@ def _insertions(route: list[Stop], v: int):
             yield route[:i] + [(v, True)] + route[i:j] + [(v, False)] + route[j:]
 
 
-def enumerate_truck(m: Model, t: int, candidates: list[int], conflicts: set[tuple[int, int]],
-                    keep: int = 3, max_sets: int = 20000, grace: int = 60) -> TruckSets:
+def enumerate_truck(m: Model, t: int, candidates: list[int], keep: int = 30,
+                    max_sets: int = 200000, grace: int = 60) -> TruckSets:
     ts = TruckSets(t, candidates)
     level: dict[frozenset, list] = {}
     for u in candidates:
@@ -59,8 +60,6 @@ def enumerate_truck(m: Model, t: int, candidates: list[int], conflicts: set[tupl
         for S, routes in level.items():
             for v in candidates:
                 if v in S or v < max(S):  # canonical extension order avoids duplicates
-                    continue
-                if any((min(v, s), max(v, s)) in conflicts for s in S):
                     continue
                 key = S | {v}
                 found = nxt.setdefault(key, [])
@@ -98,21 +97,15 @@ class ChessboardResult:
     seconds: float
 
 
-def solve(m: Model, conflicts_from_bound: list[tuple[int, int, int]] | None = None,
-          keep: int = 3, max_sets: int = 20000, time_limit: float = 60.0,
+def solve(m: Model, keep: int = 30, max_sets: int = 200000, time_limit: float = 60.0,
           fill_k: int = 3, verbose: bool = True, grace: int = 60) -> ChessboardResult:
     """grace > 60 is only a robustness check of the bound (the plan is then not valid)."""
     t0 = time.perf_counter()
     W = [o for o in range(m.n_orders) if m.o_tw[o][0] or m.o_tw[o][1]]
-    # truck-independent prune: pairs that conflict on *this* truck come from the bound
-    per_truck_conf: dict[int, set] = {}
-    for u, v, t in conflicts_from_bound or []:
-        per_truck_conf.setdefault(t, set()).add((min(u, v), max(u, v)))
     boards = []
     for t in range(m.n_trucks):
         cand = [u for u in W if m.can[u][t]]
-        ts = enumerate_truck(m, t, cand, per_truck_conf.get(t, set()) if grace == 60 else set(),
-                             keep, max_sets, grace)
+        ts = enumerate_truck(m, t, cand, keep, max_sets, grace)
         boards.append(ts)
         if verbose:
             big = max((len(s) for s in ts.sets), default=0)

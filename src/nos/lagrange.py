@@ -47,7 +47,7 @@ def columns(m: Model, keep: int = 30, max_sets: int = 200000):
     W = [o for o in range(m.n_orders) if m.o_tw[o][0] or m.o_tw[o][1]]
     cols, complete = [], True
     for t in range(m.n_trucks):
-        ts = enumerate_truck(m, t, [u for u in W if m.can[u][t]], set(), keep, max_sets)
+        ts = enumerate_truck(m, t, [u for u in W if m.can[u][t]], keep, max_sets)
         complete &= not ts.truncated
         for S in ts.sets:
             cols.append((t, S, sum(m.o_val[u] for u in S)))

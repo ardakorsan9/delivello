@@ -13,7 +13,7 @@ changing one truck only needs that truck's route re-evaluated.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from typing import NamedTuple
 
 from .data import Scenario
 from .simulator import (BREAK_AFTER, BREAK_MIN, LATE_GRACE_MIN, REST_AFTER, REST_MIN,
@@ -23,8 +23,7 @@ INF = 10**9
 Stop = tuple[int, bool]  # (order index, is_pickup)
 
 
-@dataclass(frozen=True)
-class TruckEval:
+class TruckEval(NamedTuple):  # a tuple: cheap to create (millions per run)
     km: float = 0.0
     loaded: float = 0.0
     cost: float = 0.0

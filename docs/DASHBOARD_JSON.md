@@ -59,7 +59,8 @@ Time: all minutes count from **minute 0 = Day 1, 06:00**. Day/clock for a minute
               "window_served": 42,          // served by this plan
               "window_max": 42,             // most that can be served at all (chessboard)
               "window_max_proven": true,    // enumeration complete
-              "pairwise_upper_bound": 44 }, // weaker CP-SAT bound
+              "score_upper_bound": 935.15,  // Lagrangian bound: no plan can score more (docs/UPPER_BOUND.md)
+              "fulfillment_upper_bound": 87.03 },
 
   "stages": [                               // before/after story, in order
     { "name": "naive round robin", "score": 480.6, "orders_fulfilled": 0, "breakdown": {},

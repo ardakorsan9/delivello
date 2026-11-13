@@ -14,9 +14,21 @@ from __future__ import annotations
 
 import numpy as np
 
-from .evaluate import EMPTY, Model, Stop, TruckEval
+from .evaluate import Model, Stop, TruckEval
 
 NEG = float("-inf")
+
+
+_MASK_CACHE: dict[int, tuple] = {}
+
+
+def _masks(size: int):
+    """Flat indices of the strict lower triangle and of the diagonal of a size x size matrix."""
+    mk = _MASK_CACHE.get(size)
+    if mk is None:
+        i, j = np.tril_indices(size, -1)
+        mk = _MASK_CACHE[size] = (i * size + j, np.arange(size) * (size + 1))
+    return mk
 
 
 class Insertion:
@@ -25,6 +37,7 @@ class Insertion:
         self.routes = routes or [[] for _ in range(m.n_trucks)]
         self.evals = [m.eval_truck(t, r) for t, r in enumerate(self.routes)]
         self.tot = list(Model.totals(self.evals))
+        self._geo: dict = {}
 
     def delta(self, t: int, new: TruckEval) -> float:
         old = self.evals[t]
@@ -33,6 +46,22 @@ class Insertion:
                                   tot[2] - old.cost + new.cost, tot[3] - old.co2 + new.co2,
                                   tot[4] - old.value + new.value, tot[5] - old.count + new.count) \
             - self.m.score_parts(*tot)
+
+    def _geometry(self, t: int):
+        """Route-only arrays for the position search, cached until truck t's route changes."""
+        r = self.routes[t]
+        g = self._geo.get(t)
+        if g is not None and g[0] is r:
+            return g
+        m, K, n = self.m, self.m.km_np, len(r)
+        city = np.fromiter((m.o_city[a][0 if p else 1] for a, p in r), dtype=np.int64, count=n)
+        prev = np.empty(n + 1, dtype=np.int64)               # prev[k] = city before position k
+        prev[0] = m.t_start[t]
+        prev[1:] = city
+        succ = K[prev[:n], city]                             # km of the edge that an insertion splits
+        g = (r, prev, city, succ)
+        self._geo[t] = g
+        return g
 
     def positions(self, t: int, o: int, topn: int | None) -> list[tuple[int, int]]:
         """(i, j) insertion positions; with topn only the topn with the smallest km increase.
@@ -43,24 +72,24 @@ class Insertion:
         n = len(self.routes[t])
         if topn is None or (n + 1) * (n + 2) // 2 <= topn:
             return [(i, j) for i in range(n + 1) for j in range(i, n + 1)]
-        m, r = self.m, self.routes[t]
-        K = m.km_np
-        pc, dc = m.o_city[o]
-        city = np.fromiter((m.o_city[a][0 if p else 1] for a, p in r), dtype=np.int64, count=n)
-        prev = np.concatenate(([m.t_start[t]], city))       # prev[k] = city before position k
-        nxt_d = np.zeros(n + 1)                              # (succ - prev) correction, 0 at the end
-        nxt_d[:n] = K[prev[:n], city]
-        A = K[prev, pc] + np.append(K[pc, city] - nxt_d[:n], 0.0)
-        B = K[prev, dc] + np.append(K[dc, city] - nxt_d[:n], 0.0)
-        C = K[prev, pc] + K[pc, dc] + np.append(K[dc, city] - nxt_d[:n], 0.0)
-        M = A[:, None] + B[None, :]
-        M[np.tril_indices(n + 1)] = np.inf                   # need i < j
-        M[np.diag_indices(n + 1)] = C
+        _, prev, city, succ = self._geometry(t)
+        K = self.m.km_np
+        pc, dc = self.m.o_city[o]
+        rp, rd = K[pc], K[dc]                                # symmetric matrix: rows = columns
+        ep = np.zeros(n + 1)
+        ep[:n] = rp[city] - succ
+        ed = np.zeros(n + 1)
+        ed[:n] = rd[city] - succ
+        A = rp[prev] + ep
+        M = A[:, None] + (rd[prev] + ed)[None, :]
+        tril, diag = _masks(n + 1)
         flat = M.ravel()
+        flat[tril] = np.inf                                  # need i < j ...
+        flat[diag] = rp[prev] + K[pc, dc] + ed               # ... or i == j (adjacent P, D)
         k = min(topn, flat.size)
         idx = np.argpartition(flat, k - 1)[:k]
-        idx = idx[np.isfinite(flat[idx])]
-        return [(int(x) // (n + 1), int(x) % (n + 1)) for x in idx]
+        idx = idx[flat[idx] < np.inf]
+        return [divmod(int(x), n + 1) for x in idx]
 
     def candidates(self, t: int, o: int, topn: int | None = None) -> list[tuple[float, TruckEval, list[Stop]]]:
         """Feasible insertions of order o into truck t, best first (exact score delta)."""
@@ -89,6 +118,7 @@ class Insertion:
     def copy(self) -> "Insertion":
         c = Insertion.__new__(Insertion)
         c.m, c.routes, c.evals, c.tot = self.m, [list(r) for r in self.routes], list(self.evals), list(self.tot)
+        c._geo = {}
         return c
 
     def apply(self, t: int, e: TruckEval, route: list[Stop]) -> None:
@@ -154,18 +184,3 @@ def regret_insertion(m: Model, k: int = 2, orders: list[int] | None = None,
                 refresh(o2, t)
     return ins
 
-
-def anchored_construction(m: Model, assignment: dict[int, int], k: int = 2) -> Insertion:
-    """Place time-window orders on the trucks a global assignment chose (e.g. the
-    CP-SAT bound), hardest first, then fill in all other orders by regret-k."""
-    ins = Insertion(m)
-    # fewest alternatives first: tight windows decide the start of the routes
-    order = sorted(assignment, key=lambda u: (m.o_tw[u][0] or m.o_tw[u][1])[1]
-                   if (m.o_tw[u][0] or m.o_tw[u][1]) else 0)
-    for u in order:
-        t = assignment[u]
-        c = ins.candidates(t, u)
-        if c:
-            ins.apply(t, c[0][1], c[0][2])
-    rest = [o for o in range(m.n_orders) if o not in ins.assigned()]
-    return regret_insertion(m, k=k, orders=rest, ins=ins)

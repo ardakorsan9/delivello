@@ -6,7 +6,7 @@ For each scenario with results/<scenario>/best.json:
 - independent re-checks: valid ids/actions, one truck per order, pickup before
   delivery, every pickup delivered, capacity at every moment, truck type, and no
   stop more than 60 min late (otherwise the order is lost)
-- score and how far it is from the fulfillment upper bound (bounds.py)
+- score and how far it is from the Lagrangian upper bound (lagrange.py)
 
 Usage:  uv run python scripts/check_plans.py [scenario ...]
 """
@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import sys
 
-from nos.bounds import window_bound
+from nos.lagrange import lagrangian_bound
 from nos.data import load_scenario
 from nos.evaluate import Model
 from nos.plans import best_plan
@@ -74,15 +74,15 @@ def main() -> int:
         res = simulate(sc, plan)
         errs = independent_checks(sc, plan)
         late = [(s["order"], s["late_min"]) for t in res.trucks for s in t["schedule"] if s["late_min"] > 60]
-        m = Model(sc)
-        bound = window_bound(m)
+        bound = lagrangian_bound(Model(sc))
         s = res.simulate
         ok = fp_ok and not res.violations and not errs and not late
         bad += not ok
         print(f"{'OK  ' if ok else 'FAIL'} {sid}: score {res.score:.2f}  orders {s['orders_fulfilled']}/{s['orders_total']}  "
               f"trucks used {len(plan)}  violations {len(res.violations)}  late>60 {len(late)}  "
               f"data {'current' if fp_ok else 'STALE'}")
-        print(f"      fulfillment {res.breakdown['fulfillment']} (upper bound {bound['max_fulfillment']:.2f})  "
+        print(f"      score upper bound {bound.score_ub:.2f} (gap {bound.score_ub - res.score:.2f})  "
+              f"fulfillment {res.breakdown['fulfillment']} (upper bound {bound.fulfillment_ub:.2f})  "
               f"cost {res.breakdown['cost_efficiency']}  loaded {res.breakdown['loaded_ratio']}  "
               f"co2 {res.breakdown['co2_efficiency']}  late_penalty {res.breakdown['late_penalty']}")
         for e in (errs + [f"late {o} {mn} min" for o, mn in late])[:10]:

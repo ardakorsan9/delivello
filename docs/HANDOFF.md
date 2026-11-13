@@ -28,16 +28,17 @@ commands step by step. Rules reference: [RULES.md](RULES.md). Literature: [RESEA
 | `scripts/collect_fixtures.py` | probe plans -> real API responses in `tests/fixtures/` |
 | `src/nos/simulator.py` | exact re-implementation of Simulate + Score (matches all 29 fixtures) |
 | `src/nos/evaluate.py` | fast per-truck evaluator for valid plans (`Model`), agrees with simulator |
-| `src/nos/construct.py` | `Insertion` state, regret-k insertion, `anchored_construction` |
-| `src/nos/bounds.py` | CP-SAT upper bound on fulfillment (time-window conflicts) + window->truck assignment |
 | `src/nos/alns.py` | ALNS: 5 destroy ops, 3 repairs, adaptive weights, PI-controlled SA temperature, route pool |
 | `src/nos/chessboard.py` | exact window-order placement: per-truck feasible window sets + CP-SAT packing |
 | `src/nos/polish.py` | set partitioning over the route pool + Dinkelbach for the loaded ratio |
 | `src/nos/timeline.py` | minute timeline (drive/break/rest/wait/service) for Gantt + map animation |
-| `scripts/chessboard.py`, `scripts/export_dashboard.py` | run the chessboard / write `results/<s>/dashboard.json` ([contract](DASHBOARD_JSON.md)) |
-| `scripts/construct.py` / `scripts/optimize.py` | build / improve plans offline, archive only if better |
-| `scripts/check_plans.py` | offline check of every best.json against all rules + bound |
-| `scripts/probe_rules.py`, `scripts/compare_fixtures.py` | rule probes (API) / simulator vs fixtures |
+| `src/nos/construct.py` | `Insertion` state (incremental totals), regret-k insertion, top-n position search |
+| `src/nos/lagrange.py` | Lagrangian upper bound on the score ([math](UPPER_BOUND.md)) |
+| `src/nos/pipeline.py` | start (best.json vs chessboard) -> parallel ALNS (multi-seed) -> polish |
+| `scripts/solve.py` | **one command per scenario**: pipeline + exact check + archive + dashboard.json |
+| `scripts/export_dashboard.py` | write `results/<s>/dashboard.json` ([contract](DASHBOARD_JSON.md)) |
+| `scripts/upper_bound.py` | Lagrangian bound with LP (GLOP) and integer (CP-SAT) cross-checks |
+| `scripts/check_plans.py` | offline check of every best.json against all rules + score upper bound |
 | `tests/fixtures/` | recorded API responses: 5 base probes per scenario + 14 rule probes (middle/big) |
 
 ## API
@@ -85,7 +86,7 @@ commands step by step. Rules reference: [RULES.md](RULES.md). Literature: [RESEA
 ## State (2026-11-13 late evening)
 - Arda's decision: **send nothing to the API until the end** (final plans ~1-2 h before the deadline, after a
   fingerprint check). Small/middle/big Score is unlimited; competitive has 3 Score + 3 Simulate, unused.
-- Local best (results/<scenario>/best.json, git-ignored): small 1000.00, middle 996.56, big 964.85,
+- Local best (results/<scenario>/best.json, git-ignored): small 1000.00, middle 996.56, big 966.54,
   competitive 932.22. `scripts/check_plans.py` passes for all four.
 - **Window part is optimal** (chessboard enumeration complete, robust up to 75 min tolerance):
   big 15/20, competitive 42/63 window orders. Fulfillment
@@ -98,4 +99,6 @@ commands step by step. Rules reference: [RULES.md](RULES.md). Literature: [RESEA
 ## Next step
 1. Web dashboard reading `dashboard.json` (designer's Figma, offline page), then record the demo video.
 2. Optional: chessboard tie-break on first-leg empty km; longer ALNS + polish runs.
-3. Final day: fetch fresh data, rerun pipeline if the fingerprint changed, Score with Arda's go.
+3. Final day: `uv run python scripts/fetch_data.py`; if a fingerprint changed run
+   `uv run python scripts/solve.py all --minutes 5 --fresh` (cold start reaches competitive 932.07 in ~6 min),
+   then `scripts/check_plans.py`, then Score with Arda's go.

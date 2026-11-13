@@ -1,11 +1,10 @@
-"""Upper bound, anchored construction, fast position search and a short ALNS run."""
+"""Fast position search and a short ALNS run."""
 import json
 import random
 from pathlib import Path
 
 from nos.alns import ALNS
-from nos.bounds import window_bound
-from nos.construct import Insertion, anchored_construction, regret_insertion
+from nos.construct import regret_insertion
 from nos.data import scenario_from_dict
 from nos.evaluate import Model
 from nos.simulator import simulate
@@ -39,17 +38,6 @@ def test_topn_positions_are_the_cheapest():
         brute = sorted(km(i, j) for i, j in ins.positions(t, o, None))
         fast = sorted(km(i, j) for i, j in ins.positions(t, o, 8))
         assert fast == brute[:len(fast)] and len(fast) == min(8, len(brute))
-
-
-def test_bound_and_anchored_middle():
-    m = model("scenario_middle")
-    b = window_bound(m)
-    assert b["status"] == "OPTIMAL" and b["max_fulfillment"] <= 100
-    ins = anchored_construction(m, b["assignment"])
-    res = simulate(m.sc, m.to_plan(ins.routes))
-    assert res.violations == [] and abs(res.score - ins.score()) < 0.011
-    # fulfillment can never beat the bound
-    assert res.breakdown["fulfillment"] <= b["max_fulfillment"] + 1e-6
 
 
 def test_alns_never_worse_and_valid():

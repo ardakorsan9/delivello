@@ -20,7 +20,7 @@ def test_bound_is_valid(name):
     b = lagrangian_bound(m)
     assert b.complete
     assert b.window_value_ub >= b.window_value_lb - 1e-9          # weak duality
-    plan = solve(m, None, keep=30, verbose=False).plan
+    plan = solve(m, verbose=False).plan
     assert b.score_ub >= simulate(sc, m.to_plan(plan.routes)).score - 1e-6
 
 

@@ -16,7 +16,7 @@ import sys
 from datetime import datetime, timezone
 
 from nos.chessboard import solve as chessboard
-from nos.bounds import window_bound
+from nos.lagrange import lagrangian_bound
 from nos.data import load_scenario
 from nos.evaluate import Model
 from nos.plans import RESULTS_DIR, best_plan
@@ -92,8 +92,8 @@ def export(sid: str) -> dict:
                        "status": status, "late_min": lm,
                        "direct_km": sc.km(o.pickup_city, o.delivery_city)})
 
-    bound = window_bound(m)
-    cb = chessboard(m, bound["conflict_list"], keep=30, max_sets=200000, verbose=False)
+    cb = chessboard(m, verbose=False)
+    lag = lagrangian_bound(m)
     cb_sim = simulate(sc, m.to_plan(cb.plan.routes))
     stages = [stage("naive round robin", simulate(sc, round_robin(sc))),
               stage("chessboard (CP-SAT window placement + regret insertion)", cb_sim),
@@ -122,7 +122,8 @@ def export(sid: str) -> dict:
                                                                  and (sc.orders[o["id"]].pickup_window
                                                                       or sc.orders[o["id"]].delivery_window)),
                    "window_max": cb.window_served, "window_max_proven": not cb.truncated_trucks,
-                   "pairwise_upper_bound": bound["max_served"]},
+                   "score_upper_bound": round(lag.score_ub, 2),
+                   "fulfillment_upper_bound": round(lag.fulfillment_ub, 3)},
         "stages": stages,
         "search_history": history,
     }

@@ -34,7 +34,23 @@ cp .env.example .env        # Windows: copy .env.example .env
 uv run python scripts/fetch_data.py     # download all scenarios into data/
 uv run python scripts/check_team.py     # verify the API key, show team info and limits
 uv run pytest                           # run tests
+
+# solve one scenario (or "all"): chessboard start -> parallel ALNS -> polish -> check -> dashboard.json
+uv run python scripts/solve.py scenario_competitive --minutes 10
+uv run python scripts/check_plans.py    # check every stored best plan against all rules (offline)
+uv run python scripts/upper_bound.py    # Lagrangian upper bound on the score
 ```
+
+Nothing above submits a plan. Submissions go only through `scripts/submit.py`.
+
+## Method
+1. **Exact simulator**: a re-implementation of the Simulate/Score rules, checked against recorded API responses.
+2. **Chessboard**: CP-SAT places the time-window orders on trucks, then regret insertion fills in the rest.
+3. **ALNS** (Ropke & Pisinger 2006) on the official score, run in parallel with several seeds. The
+   simulated-annealing temperature is driven by a PI controller on the acceptance rate.
+4. **Set partitioning** over the route pool, with Dinkelbach's method for the loaded-km ratio.
+5. **Lagrangian upper bound**: shows how far a plan is from the best possible score
+   ([docs/UPPER_BOUND.md](docs/UPPER_BOUND.md)).
 
 `scenario_competitive` allows only 3 Score and 3 Simulate calls per team. The client
 (`src/nos/api.py`) refuses those calls unless `confirm=True` is passed.

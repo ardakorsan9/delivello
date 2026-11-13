@@ -8,7 +8,7 @@ __pycache__/
 .pytest_cache/
 
 # downloaded scenario data and results (regenerated from the API)
-data/
+/data/
 results/
 
 # os / editor

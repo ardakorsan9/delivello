@@ -11,7 +11,7 @@ uv run python scripts/build_web.py
 
 ## Open
 Double-click `web/index.html`. From Windows, open
-`\\wsl.localhost\Ubuntu\home\ardak\projects\nos\web\index.html`; the distro name may differ, see `wsl -l`.
+`\\wsl.localhost\Ubuntu-24.04\home\ardak\projects\nos\web\index.html`.
 
 URL options (append to the address):
 | Option | Effect |

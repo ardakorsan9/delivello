@@ -1,0 +1,18 @@
+# secrets - NEVER commit the API key
+.env
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# downloaded scenario data and results (regenerated from the API)
+data/
+results/
+
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

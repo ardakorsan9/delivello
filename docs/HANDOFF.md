@@ -26,7 +26,15 @@ commands step by step. Rules reference: [RULES.md](RULES.md). Literature: [RESEA
 | `scripts/check_team.py` | verify API key (via Validate) / register team name |
 | `scripts/submit.py` | `validate | simulate | score <scenario> <plan.json|best>`; competitive needs `--confirm` + typed name |
 | `scripts/collect_fixtures.py` | probe plans -> real API responses in `tests/fixtures/` |
-| `tests/fixtures/` | small/middle/big x 5 probes (sample, single_truck_sequential, consolidation, round_robin_all, violations) with scenario snapshot + Simulate + Score |
+| `src/nos/simulator.py` | exact re-implementation of Simulate + Score (matches all 29 fixtures) |
+| `src/nos/evaluate.py` | fast per-truck evaluator for valid plans (`Model`), agrees with simulator |
+| `src/nos/construct.py` | `Insertion` state, regret-k insertion, `anchored_construction` |
+| `src/nos/bounds.py` | CP-SAT upper bound on fulfillment (time-window conflicts) + window->truck assignment |
+| `src/nos/alns.py` | ALNS: 5 destroy ops, 3 repairs, adaptive weights, PI-controlled SA temperature |
+| `scripts/construct.py` / `scripts/optimize.py` | build / improve plans offline, archive only if better |
+| `scripts/check_plans.py` | offline check of every best.json against all rules + bound |
+| `scripts/probe_rules.py`, `scripts/compare_fixtures.py` | rule probes (API) / simulator vs fixtures |
+| `tests/fixtures/` | recorded API responses: 5 base probes per scenario + 14 rule probes (middle/big) |
 
 ## API
 - Base `https://hackathon-challenge.gruber-logistics.dev/Hackaton2026`, Swagger at `/swagger`.
@@ -70,5 +78,16 @@ commands step by step. Rules reference: [RULES.md](RULES.md). Literature: [RESEA
 - Extra award: "Maker Space – Most Valuable Prototype" (optional 3D-printed trucks).
 - Element rooms: main `#main-room-sfscon26:matrix.org`, Gruber `#gruber-sfscon26:matrix.org`.
 
+## State (2026-11-13 evening)
+- Arda's decision: **send nothing to the API until the end** (final plans ~1-2 h before the deadline, after a
+  fingerprint check). Small/middle/big Score is unlimited; competitive has 3 Score + 3 Simulate, unused.
+- Local best (results/<scenario>/best.json, git-ignored): small 1000.00, middle 996.54, big 964.85,
+  competitive 932.22 (179/200; two ALNS seeds converged to 932.15 / 932.22).
+- Bound: only the time-window orders limit fulfillment.
+  CP-SAT on pairwise window conflicts: big max 15/20 window orders (we serve 15 -> window part optimal; O044 hazmat
+  left out because it lowers the score), competitive max 44/63 (47 with 60-min safety slack).
+- Anchored construction (CP-SAT assignment first, then regret) beats plain regret on competitive.
+
 ## Next step
-Write `src/nos/simulator.py` (state machine + score calculator) and make it match all 15 fixtures exactly.
+1. Longer / multi-seed ALNS on competitive (~0.35 s per iteration). 2. Cut empty km (middle loaded 97.7%).
+3. Dashboard JSON contract + `alns_history.json` for the "nitro tank" chart.

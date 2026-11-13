@@ -36,6 +36,7 @@ class TruckEval:
 
 
 EMPTY = TruckEval()
+INFEASIBLE = TruckEval(ok=False)
 
 
 class Model:
@@ -50,6 +51,7 @@ class Model:
         self.dist = sc.dist
         self.drive = [[math.ceil(d * 60 / SPEED_KMH) for d in row] for row in sc.dist.tolist()]
         self.km = sc.dist.tolist()
+        self.km_np = sc.dist
         ci = sc.idx
         self.o_city = [(ci[o.pickup_city], ci[o.delivery_city]) for o in orders]
         self.o_w = [o.weight_kg for o in orders]
@@ -71,7 +73,10 @@ class Model:
         self.min_co2 = min(self.t_co2)
 
     # ---------------------------------------------------------------- truck
-    def eval_truck(self, t: int, stops: list[Stop]) -> TruckEval:
+    def eval_truck(self, t: int, stops: list[Stop], early_exit: bool = False,
+                   grace: int = LATE_GRACE_MIN) -> TruckEval:
+        """Evaluate one truck route. With early_exit an infeasible route returns
+        INFEASIBLE as soon as it is detected (used by the insertion search)."""
         if not stops:
             return EMPTY
         km_m, dr_m = self.km, self.drive
@@ -99,7 +104,11 @@ class Model:
                         now += p if p > 0 else 0
                         cont = 0
                     off = 0
-                    step = min(rem, BREAK_AFTER - cont, REST_AFTER - daily)
+                    step = BREAK_AFTER - cont
+                    if REST_AFTER - daily < step:
+                        step = REST_AFTER - daily
+                    if rem < step:
+                        step = rem
                     now += step
                     cont += step
                     daily += step
@@ -120,7 +129,9 @@ class Model:
                         daily = 0
                 elif now > win[1]:
                     lt = now - win[1]
-                    if lt > LATE_GRACE_MIN:
+                    if lt > grace:
+                        if early_exit:
+                            return INFEASIBLE
                         ok = False
                     if lt > late.get(o, 0):
                         late[o] = lt
@@ -134,6 +145,8 @@ class Model:
                 load += o_w[o]
                 on += 1
                 if load > cap:
+                    if early_exit:
+                        return INFEASIBLE
                     ok = False
             else:
                 load -= o_w[o]

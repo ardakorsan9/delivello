@@ -62,6 +62,8 @@ class ALNSResult:
     history: list[dict] = field(default_factory=list)
     op_stats: dict = field(default_factory=dict)
     iterations: int = 0
+    # truck -> set of feasible routes seen in accepted / best solutions (for set partitioning)
+    pool: dict = field(default_factory=dict)
 
 
 class ALNS:
@@ -161,6 +163,14 @@ class ALNS:
         seg_uses = {k: 0 for k in (*dw, *rw)}
         stats = {k: {"uses": 0, "best": 0} for k in (*dw, *rw)}
         hist = []
+        pool: dict[int, set] = {t: set() for t in range(m.n_trucks)}
+
+        def record(sol: Insertion) -> None:
+            for t, r in enumerate(sol.routes):
+                if r and len(pool[t]) < 5000:
+                    pool[t].add(tuple(r))
+
+        record(start)
         t0 = time.perf_counter()
         last_log = 0.0
         it = 0
@@ -205,6 +215,8 @@ class ALNS:
                     reward = SIGMA_ACCEPT
                     worse_accepted = True
                 temp.update(worse_accepted, progress)
+            if reward:  # accepted or new best: keep its routes
+                record(cand)
             for k in (d, r):
                 seg_score[k] += reward
                 seg_uses[k] += 1
@@ -227,4 +239,4 @@ class ALNS:
                 print(f"  {el:6.1f}s it={it:6d} best={best_s:8.3f} cur={cur_s:8.3f} "
                       f"T={temp.T:7.3f} acc={temp.ema:.3f} orders={n_assigned(best)}/{m.n_orders}",
                       flush=True)
-        return ALNSResult(best, hist, {"stats": stats, "destroy_w": dw, "repair_w": rw}, it)
+        return ALNSResult(best, hist, {"stats": stats, "destroy_w": dw, "repair_w": rw}, it, pool)

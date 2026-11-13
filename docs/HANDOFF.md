@@ -30,7 +30,11 @@ commands step by step. Rules reference: [RULES.md](RULES.md). Literature: [RESEA
 | `src/nos/evaluate.py` | fast per-truck evaluator for valid plans (`Model`), agrees with simulator |
 | `src/nos/construct.py` | `Insertion` state, regret-k insertion, `anchored_construction` |
 | `src/nos/bounds.py` | CP-SAT upper bound on fulfillment (time-window conflicts) + window->truck assignment |
-| `src/nos/alns.py` | ALNS: 5 destroy ops, 3 repairs, adaptive weights, PI-controlled SA temperature |
+| `src/nos/alns.py` | ALNS: 5 destroy ops, 3 repairs, adaptive weights, PI-controlled SA temperature, route pool |
+| `src/nos/chessboard.py` | exact window-order placement: per-truck feasible window sets + CP-SAT packing |
+| `src/nos/polish.py` | set partitioning over the route pool + Dinkelbach for the loaded ratio |
+| `src/nos/timeline.py` | minute timeline (drive/break/rest/wait/service) for Gantt + map animation |
+| `scripts/chessboard.py`, `scripts/export_dashboard.py` | run the chessboard / write `results/<s>/dashboard.json` ([contract](DASHBOARD_JSON.md)) |
 | `scripts/construct.py` / `scripts/optimize.py` | build / improve plans offline, archive only if better |
 | `scripts/check_plans.py` | offline check of every best.json against all rules + bound |
 | `scripts/probe_rules.py`, `scripts/compare_fixtures.py` | rule probes (API) / simulator vs fixtures |
@@ -78,16 +82,20 @@ commands step by step. Rules reference: [RULES.md](RULES.md). Literature: [RESEA
 - Extra award: "Maker Space – Most Valuable Prototype" (optional 3D-printed trucks).
 - Element rooms: main `#main-room-sfscon26:matrix.org`, Gruber `#gruber-sfscon26:matrix.org`.
 
-## State (2026-11-13 evening)
+## State (2026-11-13 late evening)
 - Arda's decision: **send nothing to the API until the end** (final plans ~1-2 h before the deadline, after a
   fingerprint check). Small/middle/big Score is unlimited; competitive has 3 Score + 3 Simulate, unused.
-- Local best (results/<scenario>/best.json, git-ignored): small 1000.00, middle 996.54, big 964.85,
-  competitive 932.22 (179/200; two ALNS seeds converged to 932.15 / 932.22).
-- Bound: only the time-window orders limit fulfillment.
-  CP-SAT on pairwise window conflicts: big max 15/20 window orders (we serve 15 -> window part optimal; O044 hazmat
-  left out because it lowers the score), competitive max 44/63 (47 with 60-min safety slack).
-- Anchored construction (CP-SAT assignment first, then regret) beats plain regret on competitive.
+- Local best (results/<scenario>/best.json, git-ignored): small 1000.00, middle 996.56, big 964.85,
+  competitive 932.22. `scripts/check_plans.py` passes for all four.
+- **Window part is optimal** (chessboard enumeration complete, robust up to 75 min tolerance):
+  big 15/20, competitive 42/63 window orders. Fulfillment
+  cannot rise further (big O044 hazmat is left out because it lowers the score).
+- All remaining empty km are first legs (start city -> first pickup) of trucks that carry window orders;
+  zero empty km between orders. Remaining upside: ~1-3 points per scenario via alternative window
+  assignments with shorter first legs.
+- Before/after (dashboard stages): competitive 480.6 (naive) -> 931.0 (chessboard) -> 932.2 (final).
 
 ## Next step
-1. Longer / multi-seed ALNS on competitive (~0.35 s per iteration). 2. Cut empty km (middle loaded 97.7%).
-3. Dashboard JSON contract + `alns_history.json` for the "nitro tank" chart.
+1. Web dashboard reading `dashboard.json` (designer's Figma, offline page), then record the demo video.
+2. Optional: chessboard tie-break on first-leg empty km; longer ALNS + polish runs.
+3. Final day: fetch fresh data, rerun pipeline if the fingerprint changed, Score with Arda's go.

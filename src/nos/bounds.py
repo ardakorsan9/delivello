@@ -69,6 +69,7 @@ def window_bound(m: Model, slack: int = 0, time_limit: float = 30.0) -> dict:
         "window_orders": len(W),
         "never_feasible": [u for u in W if not alone[u]],
         "conflicts": len(conflicts),
+        "conflict_list": conflicts,
         "max_served": len(served),
         "must_lose": lost,
         "min_value_lost": max(0.0, window_value - best_bound_value),

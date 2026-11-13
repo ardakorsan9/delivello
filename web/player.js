@@ -40,6 +40,7 @@ function makeProjection(cities) {
 function prepare(sid) {
   const d = DATA[sid];
   const project = makeProjection(d.cities);
+  PROJECT = project; PATHS = {};
   const city = {};
   for (const c of d.cities) city[c.id] = { ...c, xy: project(c.lon, c.lat) };
   const n = d.trucks.length;
@@ -50,17 +51,14 @@ function prepare(sid) {
     const km0 = [];            // cumulative km / empty km at each segment start
     const em0 = [];
     let km = 0, em = 0, heading = 0;
-    const head = [];           // heading per segment, carried through stops
+    const head = [];           // heading per segment (road tangent), carried through stops
     for (const s of segs) {
       km0.push(km); em0.push(em);
       if (s.kind === "drive") { km += s.km; if (!s.loaded) em += s.km; }
-      if (s.from) {
-        const a = city[s.from].xy, b = city[s.to].xy;
-        if (a[0] !== b[0] || a[1] !== b[1]) heading = Math.atan2(b[1] - a[1], b[0] - a[0]);
-      }
+      if (s.from) heading = pointAt(getPath(city, s.from, s.to), s.kind === "drive" ? s.f1 : s.f)[2];
       head.push(heading);
     }
-    return { ...t, color: `hsl(${hue} 85% 62%)`, colorDim: `hsla(${hue} 85% 62% / 0.16)`, segs, starts, km0, em0, head,
+    return { ...t, color: `hsl(${hue} 85% 62%)`, segs, starts, km0, em0, head,
              end: segs.length ? segs[segs.length - 1].end : 0, kmTotal: km, emTotal: em };
   });
   const deliveries = [], events = [];
@@ -88,28 +86,46 @@ function renderBase(d, city, trucks) {
     ring.forEach(([lon, lat], i) => { const [x, y] = project(lon, lat); i ? g.lineTo(x, y) : g.moveTo(x, y); });
     g.closePath(); g.fill(); g.stroke();
   }
-  // planned routes, faint
-  g.lineWidth = 2;
-  for (const t of trucks) {
-    g.strokeStyle = t.colorDim;
-    for (const s of t.segs) if (s.kind === "drive") line(g, city, s, s.f0, s.f1);
-  }
   // cities
   g.font = "12px system-ui, sans-serif"; g.textBaseline = "middle";
   for (const c of Object.values(city)) {
     g.fillStyle = "#d7defa"; g.beginPath(); g.arc(c.xy[0], c.xy[1], 3.2, 0, 7); g.fill();
     g.fillStyle = C("--muted"); g.fillText(c.name, c.xy[0] + 6, c.xy[1] - 8);
   }
+  g.font = "11px system-ui, sans-serif"; g.fillStyle = C("--muted"); g.textBaseline = "bottom";
+  g.fillText("Roads © OpenStreetMap contributors (OSRM) · Map: Natural Earth", 10, H - 8);
   return off;
 }
 
-function lerp(city, s, f) {
-  const a = city[s.from].xy, b = city[s.to].xy;
-  return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f];
+// ---- road geometry: a leg from -> to follows the OSRM road polyline (straight line if none)
+let PROJECT = null, PATHS = {};
+function getPath(city, from, to) {
+  const key = from + ">" + to;
+  if (PATHS[key]) return PATHS[key];
+  const raw = (window.NOS_ROADS || {})[from < to ? from + "|" + to : to + "|" + from];
+  let pts = raw && raw.length >= 2 ? raw.map(([lon, lat]) => PROJECT(lon, lat)) : [city[from].xy, city[to].xy];
+  if (raw && from > to) pts.reverse();
+  pts[0] = city[from].xy; pts[pts.length - 1] = city[to].xy;   // snap the ends onto the city dots
+  const cum = [0];
+  for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+  return (PATHS[key] = { pts, cum, L: cum[cum.length - 1] || 1 });
 }
+function pointAt(p, f) {      // [x, y, heading] at fraction f of the road length
+  const d = Math.min(Math.max(f, 0), 1) * p.L;
+  let i = Math.max(1, upper(p.cum, d));
+  if (i >= p.pts.length) i = p.pts.length - 1;
+  const a = p.pts[i - 1], b = p.pts[i], seg = (p.cum[i] - p.cum[i - 1]) || 1, u = (d - p.cum[i - 1]) / seg;
+  return [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u, Math.atan2(b[1] - a[1], b[0] - a[0])];
+}
+function lerp(city, s, f) { return pointAt(getPath(city, s.from, s.to), f); }
 function line(g, city, s, f0, f1) {
-  const p = lerp(city, s, f0), q = lerp(city, s, f1);
-  g.beginPath(); g.moveTo(p[0], p[1]); g.lineTo(q[0], q[1]); g.stroke();
+  const p = getPath(city, s.from, s.to), a = pointAt(p, f0), b = pointAt(p, f1);
+  g.beginPath(); g.moveTo(a[0], a[1]);
+  for (let i = 1; i < p.pts.length - 1; i++) {
+    const r = p.cum[i] / p.L;
+    if (r > f0 && r < f1) g.lineTo(p.pts[i][0], p.pts[i][1]);
+  }
+  g.lineTo(b[0], b[1]); g.stroke();
 }
 function upper(arr, x) { let lo = 0, hi = arr.length; while (lo < hi) { const m = (lo + hi) >> 1; arr[m] <= x ? lo = m + 1 : hi = m; } return lo; }
 
@@ -126,34 +142,42 @@ function stateAt(S, tr, t) {
   }
   const u = (t - s.start) / Math.max(1, s.end - s.start);
   let xy, km = tr.km0[i], em = tr.em0[i];
+  let heading = tr.head[i];
   if (s.kind === "drive") {
     const f = s.f0 + (s.f1 - s.f0) * u;
-    xy = lerp(S.city, s, f);
+    const q = lerp(S.city, s, f); xy = [q[0], q[1]]; heading = q[2];
     km += s.km * u; if (!s.loaded) em += s.km * u;
-  } else if (s.kind === "break" || s.kind === "rest") xy = lerp(S.city, s, s.f);
+  } else if (s.kind === "break" || s.kind === "rest") { const q = lerp(S.city, s, s.f); xy = [q[0], q[1]]; heading = q[2]; }
   else xy = S.city[s.city].xy;
   // service segments carry the load *before* the stop: show the box from the start of a pickup
   const loaded = s.kind === "service" ? s.action === "pickup" || s.loaded : s.loaded;
-  return { xy, heading: tr.head[i], loaded, kind: s.kind, km, em, seg: i };
+  return { xy, heading, loaded, kind: s.kind, km, em, seg: i };
 }
 
 // ---------------------------------------------------------------- drawing
 function draw(S, t) {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   ctx.drawImage(S.base, 0, 0, W, H);
-  // travelled path: loaded solid in truck colour, empty dashed grey
+  // short fading trail behind each truck: loaded solid in truck colour, empty dashed grey
+  const TRAIL = S.horizon * 0.05, PIECES = 4;
   ctx.lineWidth = 3; ctx.lineCap = "round";
   for (const tr of S.trucks) {
-    const i = upper(tr.starts, t) - 1;
-    for (let k = 0; k <= i && k < tr.segs.length; k++) {
+    for (let k = upper(tr.starts, t) - 1; k >= 0 && tr.segs[k].end > t - TRAIL; k--) {
       const s = tr.segs[k];
       if (s.kind !== "drive") continue;
-      const f1 = t >= s.end ? s.f1 : s.f0 + (s.f1 - s.f0) * (t - s.start) / Math.max(1, s.end - s.start);
-      ctx.strokeStyle = s.loaded ? tr.color : C("--muted");
-      ctx.setLineDash(s.loaded ? [] : [6, 6]);
-      line(ctx, S.city, s, s.f0, f1);
+      const tA = Math.max(s.start, t - TRAIL), tB = Math.min(s.end, t);
+      for (let q = 0; q < PIECES; q++) {       // split so the fade is smooth along long legs
+        const a = tA + (tB - tA) * q / PIECES, b = tA + (tB - tA) * (q + 1) / PIECES;
+        if (b <= a) continue;
+        const fr = (x) => s.f0 + (s.f1 - s.f0) * (x - s.start) / Math.max(1, s.end - s.start);
+        ctx.globalAlpha = Math.max(0, 1 - (t - b) / TRAIL);
+        ctx.strokeStyle = s.loaded ? tr.color : C("--muted");
+        ctx.setLineDash(s.loaded ? [] : [6, 6]);
+        line(ctx, S.city, s, fr(a), fr(b));
+      }
     }
   }
+  ctx.globalAlpha = 1;
   ctx.setLineDash([]);
   // pickup / delivery pulses (last ~2% of the horizon)
   const win = S.horizon * 0.02;

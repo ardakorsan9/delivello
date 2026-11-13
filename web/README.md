@@ -1,13 +1,17 @@
 # NOS dispatch replay (demo video)
 
-An offline player for the final plans: map, moving trucks, a red cargo box while loaded, breaks
-and rests, and KPIs. No server and no internet are needed.
+An offline player for the final plans: map, trucks driving along the real roads, a short fading
+trail, a red cargo box while loaded, breaks and rests, and KPIs. No server and no internet are needed.
 
 ## Build the data (after any new best plan)
 ```bash
 uv run python scripts/export_dashboard.py scenario_small scenario_middle scenario_big scenario_competitive
 uv run python scripts/build_web.py
 ```
+If the plans now drive a city pair that has no road geometry yet, run
+`uv run python scripts/build_web.py --roads`. It fetches only the missing pairs from OSRM (1 per
+second) and caches them in `web/data/roads_cache.json`. Pairs without geometry are drawn as
+straight lines.
 
 ## Open
 Double-click `web/index.html`. From Windows, open

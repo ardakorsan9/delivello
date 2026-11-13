@@ -96,6 +96,8 @@ commands step by step. Rules reference: [RULES.md](RULES.md). Literature: [RESEA
   assignments with shorter first legs.
 - Before/after (dashboard stages): competitive 480.6 (naive) -> 931.0 (chessboard) -> 932.2 (final).
 
+- **First API check (2026-11-13 22:38 UTC):** Simulate of the final middle and big plans matches our simulator
+  exactly (19 trucks, 328 stops, every metric). No Score sent yet; competitive untouched (3 + 3 left).
 - Q&A sheet with every number and its source: [QA.md](QA.md). Only one late stop in all plans
   (competitive O055, 6 min, needed: without lateness at most 41 window orders fit).
 - Feature freeze (Arda, 2026-11-13 night): no new optimiser features. Remaining work = demo video:

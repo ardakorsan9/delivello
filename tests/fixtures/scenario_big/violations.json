@@ -1,0 +1,284 @@
+{
+ "plan": {
+  "T01": [
+   {
+    "action": "delivery",
+    "order": "O001"
+   },
+   {
+    "action": "pickup",
+    "order": "O001"
+   },
+   {
+    "action": "pickup",
+    "order": "O002"
+   },
+   {
+    "action": "pickup",
+    "order": "O002"
+   },
+   {
+    "action": "delivery",
+    "order": "O002"
+   },
+   {
+    "action": "pickup",
+    "order": "O001"
+   },
+   {
+    "action": "delivery",
+    "order": "O001"
+   },
+   {
+    "action": "pickup",
+    "order": "O091"
+   },
+   {
+    "action": "pickup",
+    "order": "O076"
+   },
+   {
+    "action": "pickup",
+    "order": "O071"
+   },
+   {
+    "action": "pickup",
+    "order": "O057"
+   },
+   {
+    "action": "delivery",
+    "order": "O091"
+   },
+   {
+    "action": "delivery",
+    "order": "O076"
+   },
+   {
+    "action": "delivery",
+    "order": "O071"
+   },
+   {
+    "action": "delivery",
+    "order": "O057"
+   },
+   {
+    "action": "pickup",
+    "order": "O999"
+   },
+   {
+    "action": "fly",
+    "order": "O003"
+   }
+  ],
+  "T99": []
+ },
+ "simulate": {
+  "total_km": 293,
+  "loaded_km": 73,
+  "empty_km": 220,
+  "total_cost": 375.04,
+  "total_co2": 251.98,
+  "orders_fulfilled": 0,
+  "orders_total": 120,
+  "value_fulfilled": 0,
+  "value_lost_to_lateness": 0,
+  "value_total": 145,
+  "truck_utilization": 0.19,
+  "orders_late": 0,
+  "orders_too_late": 0,
+  "total_late_min": 0,
+  "penalized_late_min": 0,
+  "trucks": [
+   {
+    "truck": "T01",
+    "route": [
+     "C047",
+     "C025",
+     "C019"
+    ],
+    "total_km": 293,
+    "loaded_km": 73,
+    "empty_km": 220,
+    "cost": 375.04,
+    "co2": 251.98,
+    "max_load_kg": 6100,
+    "utilization": 0.19,
+    "finish_min": 312,
+    "driving_min": 252,
+    "break_and_rest_min": 0,
+    "schedule": [
+     {
+      "action": "pickup",
+      "order": "O001",
+      "city": "C025",
+      "arrival_min": 189,
+      "wait_min": 0,
+      "late_min": 0,
+      "departure_min": 219
+     },
+     {
+      "action": "delivery",
+      "order": "O001",
+      "city": "C019",
+      "arrival_min": 282,
+      "wait_min": 0,
+      "late_min": 0,
+      "departure_min": 312
+     }
+    ]
+   }
+  ]
+ },
+ "score": {
+  "scenario": "scenario_big",
+  "score": -222.63,
+  "breakdown": {
+   "fulfillment": 0,
+   "cost_efficiency": 0,
+   "loaded_ratio": 24.91,
+   "co2_efficiency": 0,
+   "penalty": 260,
+   "late_penalty": 0
+  },
+  "metrics": {
+   "total_km": 293,
+   "loaded_km": 73,
+   "empty_km": 220,
+   "total_cost": 375.04,
+   "total_co2": 251.98,
+   "orders_fulfilled": 0,
+   "orders_total": 120,
+   "value_fulfilled": 0,
+   "value_lost_to_lateness": 0,
+   "value_total": 145,
+   "truck_utilization": 0.19,
+   "orders_late": 0,
+   "orders_too_late": 0,
+   "total_late_min": 0,
+   "penalized_late_min": 0,
+   "trucks": [
+    {
+     "truck": "T01",
+     "route": [
+      "C047",
+      "C025",
+      "C019"
+     ],
+     "total_km": 293,
+     "loaded_km": 73,
+     "empty_km": 220,
+     "cost": 375.04,
+     "co2": 251.98,
+     "max_load_kg": 6100,
+     "utilization": 0.19,
+     "finish_min": 312,
+     "driving_min": 252,
+     "break_and_rest_min": 0,
+     "schedule": [
+      {
+       "action": "pickup",
+       "order": "O001",
+       "city": "C025",
+       "arrival_min": 189,
+       "wait_min": 0,
+       "late_min": 0,
+       "departure_min": 219
+      },
+      {
+       "action": "delivery",
+       "order": "O001",
+       "city": "C019",
+       "arrival_min": 282,
+       "wait_min": 0,
+       "late_min": 0,
+       "departure_min": 312
+      }
+     ]
+    }
+   ]
+  },
+  "validation": {
+   "is_valid": false,
+   "violations": [
+    {
+     "rule": "truck_type_mismatch",
+     "truck": "T01",
+     "order": "O001",
+     "message": "Order 'O001' requires 'hazmat' truck, got 'refrigerated'."
+    },
+    {
+     "rule": "delivery_before_pickup",
+     "truck": "T01",
+     "order": "O001",
+     "message": "Order 'O001' delivered before pickup."
+    },
+    {
+     "rule": "truck_type_mismatch",
+     "truck": "T01",
+     "order": "O001",
+     "message": "Order 'O001' requires 'hazmat' truck, got 'refrigerated'."
+    },
+    {
+     "rule": "capacity_exceeded",
+     "truck": "T01",
+     "order": "O002",
+     "message": "Load 11400 kg would exceed capacity 8000 kg when picking up 'O002'. Pickup rejected."
+    },
+    {
+     "rule": "duplicate_pickup",
+     "truck": "T01",
+     "order": "O002",
+     "message": "Order 'O002' picked up more than once."
+    },
+    {
+     "rule": "duplicate_pickup",
+     "truck": "T01",
+     "order": "O001",
+     "message": "Order 'O001' picked up more than once."
+    },
+    {
+     "rule": "capacity_exceeded",
+     "truck": "T01",
+     "order": "O091",
+     "message": "Load 9800 kg would exceed capacity 8000 kg when picking up 'O091'. Pickup rejected."
+    },
+    {
+     "rule": "capacity_exceeded",
+     "truck": "T01",
+     "order": "O076",
+     "message": "Load 9600 kg would exceed capacity 8000 kg when picking up 'O076'. Pickup rejected."
+    },
+    {
+     "rule": "capacity_exceeded",
+     "truck": "T01",
+     "order": "O071",
+     "message": "Load 9500 kg would exceed capacity 8000 kg when picking up 'O071'. Pickup rejected."
+    },
+    {
+     "rule": "capacity_exceeded",
+     "truck": "T01",
+     "order": "O057",
+     "message": "Load 9300 kg would exceed capacity 8000 kg when picking up 'O057'. Pickup rejected."
+    },
+    {
+     "rule": "unknown_order",
+     "truck": "T01",
+     "order": "O999",
+     "message": "Order 'O999' does not exist."
+    },
+    {
+     "rule": "unknown_action",
+     "truck": "T01",
+     "order": "O003",
+     "message": "Unknown action 'fly'. Use 'pickup' or 'delivery'."
+    },
+    {
+     "rule": "unknown_truck",
+     "truck": "T99",
+     "order": null,
+     "message": "Truck 'T99' does not exist."
+    }
+   ]
+  }
+ }
+}

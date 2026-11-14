@@ -26,7 +26,7 @@ function clock(min) {
 // ---- side panel: planned vs no reaction vs NOS replan
 function compareCard() {
   const rows = [["Planned (no breakdown)", WF.score_planned, "plan"], ["No reaction", WF.score_no_reaction, "bad"],
-                ["NOS replan", WF.score_nos, "good"]];
+                ["Delivello replan", WF.score_nos, "good"]];
   const lo = 850, hi = 940, pct = (v) => Math.max(2, 100 * (v - lo) / (hi - lo));
   document.getElementById("wf-compare").innerHTML = rows.map(([n, v, c]) =>
     `<div class="wf-row ${c}"><span>${n}</span><div><i style="width:${pct(v)}%"></i></div><b>${v.toFixed(2)}</b></div>`).join("") +
@@ -41,7 +41,7 @@ function banner(stage) {
   b.className = stage === 1 ? "alert" : "ok";
   document.getElementById("wf-title").textContent = stage === 1
     ? `⚠ ${WF.kind}: ${WF.truck} stopped in ${WF.city_name}`
-    : `✓ NOS replanned in ${WF.replan_seconds} s`;
+    : `✓ Delivello replanned in ${WF.replan_seconds} s`;
   document.getElementById("wf-sub").textContent = stage === 1
     ? `${clock(WF.t)} · ${WF.onboard.length} orders on board, ${WF.waiting.length} waiting · replanning…`
     : `${WF.saved} / ${n} orders saved by ${WF.helpers.length} trucks (${WF.helpers.join(", ")})` +
@@ -128,7 +128,7 @@ const INTRO_S = 4.5;
   document.getElementById("wf-i-title").textContent = "What if a truck breaks down?";
   document.getElementById("wf-i-sub").textContent =
     `On day ${WF.day}, truck ${WF.truck} stops in ${WF.city_name} with ${WF.onboard.length} orders on board ` +
-    `and ${WF.waiting.length} more still to collect. Watch NOS replan the rest of the fleet in seconds ` +
+    `and ${WF.waiting.length} more still to collect. Watch Delivello replan the rest of the fleet in seconds ` +
     (WF.saved === n ? `and save all ${n} orders.` : `and save ${WF.saved} of these ${n} orders.`);
   document.getElementById("wf-i-note").textContent =
     "Realistic scenario, not a recorded incident. Everything before the breakdown stays as it happened.";

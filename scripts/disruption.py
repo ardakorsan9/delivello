@@ -18,7 +18,8 @@ comparable:
 Usage:
   uv run python scripts/disruption.py scan  [scenario]          # rank candidate breakdowns
   uv run python scripts/disruption.py build [scenario] T09:5 ... # write web/data/whatif_<n>.js
-  uv run python scripts/disruption.py roads                      # road geometry for those plans (OSRM)
+  uv run python scripts/disruption.py roads [--all]              # road geometry for those plans (OSRM);
+                                                                 # --all: every competitive city pair (live)
 """
 
 from __future__ import annotations
@@ -261,15 +262,16 @@ def main() -> None:
     elif cmd == "build":
         build(sid, specs)
     elif cmd == "roads":
-        whatif_roads()
+        whatif_roads(all_pairs="--all" in args)
 
 
 
-def whatif_roads() -> None:
+def whatif_roads(all_pairs: bool = False) -> None:
     """Road geometry for city pairs only the replanned plans drive -> web/data/whatif_roads.js.
 
     Same OSRM source and cache as scripts/build_web.py (web/data/roads_cache.json); roads.js is left as it
-    is, the what-if page merges this file on top of it.
+    is, the what-if page merges this file on top of it. all_pairs: every pair of the competitive cities, so
+    that live replans (scripts/live_server.py) never fall back to straight lines.
     """
     import re
     import urllib.request
@@ -283,6 +285,11 @@ def whatif_roads() -> None:
         cities.update({c["id"]: (c["lon"], c["lat"]) for c in d["cities"]})
         for t in d["trucks"]:
             pairs |= {tuple(sorted((g["from"], g["to"]))) for g in t["timeline"] if g["kind"] == "drive"}
+    if all_pairs:
+        from itertools import combinations
+        comp = json.loads((RESULTS_DIR / "scenario_competitive" / "dashboard.json").read_text())
+        cities.update({c["id"]: (c["lon"], c["lat"]) for c in comp["cities"]})
+        pairs |= {tuple(sorted(p)) for p in combinations([c["id"] for c in comp["cities"]], 2)}
     todo = [p for p in sorted(pairs) if "|".join(p) not in cache]
     print(f"what-if roads: {len(pairs)} pairs, {len(todo)} to fetch (~{len(todo)} s)")
     url = "https://router.project-osrm.org/route/v1/driving/{},{};{},{}?overview=simplified&geometries=geojson"

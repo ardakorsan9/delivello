@@ -75,4 +75,4 @@ data/           downloaded scenarios (git-ignored, regenerate with fetch_data.py
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+GNU Affero General Public License v3.0 (AGPL-3.0) — see [LICENSE](LICENSE).

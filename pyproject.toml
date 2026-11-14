@@ -3,7 +3,7 @@ name = "nos"
 version = "0.1.0"
 description = "NOS - Network Optimization System: dispatch optimizer for the GRUBER Logistics Hackathon 2026"
 readme = "README.md"
-license = "MIT"
+license = "AGPL-3.0-or-later"
 requires-python = ">=3.11"
 dependencies = [
     "requests>=2.31",

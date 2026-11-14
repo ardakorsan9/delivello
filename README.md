@@ -1,4 +1,4 @@
-# NOS — Network Optimization System
+# Delivello · NOS — Network Optimization System
 
 Dispatch optimizer for the **GRUBER Logistics Hackathon Challenge 2026 — "Logistics Grand Prix"**
 (NOI Hackathon SFSCON Edition 2026).
@@ -7,6 +7,15 @@ Given cities, trucks and transport orders, NOS builds one ordered pickup/deliver
 truck: deliver more, drive less, minimize empty kilometres, cost and CO₂.
 
 Challenge API: <https://hackathon-challenge.gruber-logistics.dev/swagger/index.html>
+
+**Delivello** is our product; **NOS** is its optimizer. Results (offline simulator, identical to the API):
+small 1000.00, middle 997.24, big 966.54, competitive 932.22 (proven ceiling 933.66).
+
+## Demo
+- `web/index.html`: replay of the final plans on the map, score computed live from the plan.
+- `web/whatif.html`: emergency what-if: a truck breaks down mid-plan and Delivello replans the fleet
+  in a few seconds (`scripts/disruption.py`, every plan checked with the exact simulator).
+- Build the page data first: see [web/README.md](web/README.md).
 
 ## Setup
 

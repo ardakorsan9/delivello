@@ -1,1 +1,1 @@
-"""NOS - Network Optimization System."""
+"""Delivello dispatch optimizer (package name: nos)."""

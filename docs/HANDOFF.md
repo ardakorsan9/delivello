@@ -1,4 +1,4 @@
-# NOS — Handoff / project state
+# Delivello — Handoff / project state
 
 Read this first in a new session. Talk to Arda in **Turkish**; he is new to Linux, so give
 commands step by step. Rules reference: [RULES.md](RULES.md). Literature: [RESEARCH.md](RESEARCH.md).
@@ -7,7 +7,7 @@ commands step by step. Rules reference: [RULES.md](RULES.md). Literature: [RESEA
 - NOI Hackathon SFSCON Edition 2026 (Bolzano), 24 h, Fri 13 – Sat 14 Nov 2026, ~80 students.
 - Challenge: **GRUBER Logistics "Logistics Grand Prix"**: truck dispatch optimization
   (PDPTW: pickup & delivery with time windows, heterogeneous fleet, driver breaks).
-- Project: **NOS – Network Optimization System**, tagline "Ride or Deliver".
+- Project: **Delivello**, smart dispatch for GRUBER Logistics.
 - Team: Arda (control/automation engineer: code + math), a designer (Figma/Illustrator/Blender/Canva),
   a presenter. Product AI kept minimal: math first.
 
@@ -44,7 +44,7 @@ commands step by step. Rules reference: [RULES.md](RULES.md). Literature: [RESEA
 ## API
 - Base `https://hackathon-challenge.gruber-logistics.dev/Hackaton2026`, Swagger at `/swagger`.
 - Key lives in `.env` (git-ignored). **Never** put it in code, commits or chat.
-- Team id `team08`, display name "NOS". `GET /Team` does not exist (404).
+- Team id `team08` (display name registered on day 1). `GET /Team` does not exist (404).
 - `scenario_competitive` (45 cities / 25 trucks / 200 orders, ~30% time windows):
   **only 3 Score + 3 Simulate per team, none used yet. Always ask Arda before using one.**
 - small (20 orders), middle (50), big (120): unlimited. Ranking = best Score per scenario.

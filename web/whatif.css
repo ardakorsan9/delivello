@@ -1,4 +1,4 @@
-/* NOS what-if page: extra layer and panels on top of style.css (index.html does not load this file) */
+/* Delivello what-if page: extra layer and panels on top of style.css (index.html does not load this file) */
 #wf-layer { position: absolute; left: 0; top: 0; pointer-events: none; }   /* box set by whatif.js = the map canvas */
 
 #wf-banner { position: absolute; top: 18px; left: 50%; transform: translateX(calc(-50% - 170px)); max-width: 900px;

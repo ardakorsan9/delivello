@@ -1,4 +1,4 @@
-// NOS dispatch replay: plays results/<scenario>/dashboard.json (packed by scripts/build_web.py).
+// Delivello dispatch replay: plays results/<scenario>/dashboard.json (packed by scripts/build_web.py).
 // URL options: ?scenario=scenario_big  ?duration=45 (seconds)  ?tour=1 (all four, 2:00)  ?clean=1 (no controls)
 //
 // Everything on screen is computed from the plan data at the current minute:

@@ -1,4 +1,4 @@
-"""What-if: a truck breaks down mid-plan and NOS replans the rest (offline, no API calls).
+"""What-if: a truck breaks down mid-plan and Delivello replans the rest (offline, no API calls).
 
 Model of a breakdown of truck B in city C right after its stop k (minute T = that stop's departure):
 - Nothing before T can change. Every other truck keeps the stops it has done and the stop it is
@@ -10,7 +10,7 @@ Model of a breakdown of truck B in city C right after its stop k (minute T = tha
 All plans are scored with the exact simulator on that modified scenario, so before / after are
 comparable:
   no reaction  B's orders are simply lost, everybody else drives on as planned;
-  NOS replan   regret insertion of B's orders after the frozen prefixes (seconds), then a second pass
+  Delivello   regret insertion of B's orders after the frozen prefixes (seconds), then a second pass
                (no truck may finish later than the original plan does)
                that also releases every order nobody has picked up yet and re-inserts all of them;
                the better one is kept.
@@ -175,7 +175,7 @@ def scan(sid: str) -> None:
     for gain, t, k, info, s0, s1, saved, q in rows[:15]:
         print(f"{t}:{k:<3d} day {1 + (info['t'] + 360) // 1440:2d} {info['city_name']:14s} "
               f"onboard {len(info['onboard'])} waiting {len(info['waiting']):2d}  "
-              f"no reaction {s0:7.2f} -> NOS {s1:7.2f} (+{gain:5.2f})  saved "
+              f"no reaction {s0:7.2f} -> Delivello {s1:7.2f} (+{gain:5.2f})  saved "
               f"{saved}/{len(info['onboard']) + len(info['waiting'])}  {q:.1f}s")
 
 
@@ -247,7 +247,7 @@ def build(sid: str, specs: list[str]) -> None:
         index.append({"n": n, "truck": tid, "day": w["day"], "city": info["city_name"]})
         print(f"whatif_{n}: {tid} breaks down in {info['city_name']} on day {w['day']}: "
               f"{len(info['onboard'])} on board + {len(info['waiting'])} waiting -> saved {w['saved']}, "
-              f"lost {len(lost)}; score planned {s_orig:.2f} | no reaction {s0:.2f} | NOS {s1:.2f} "
+              f"lost {len(lost)}; score planned {s_orig:.2f} | no reaction {s0:.2f} | Delivello {s1:.2f} "
               f"({how}, {secs:.1f}s, helpers {', '.join(helpers)})")
     (out / "whatif_index.js").write_text("window.NOS_WHATIF_INDEX=" + json.dumps(index) + ";\n")
 

@@ -1,11 +1,11 @@
-// NOS what-if add-on: a truck breaks down mid-plan and NOS replans (data: scripts/disruption.py).
+// Delivello what-if add-on: a truck breaks down mid-plan and Delivello replans (data: scripts/disruption.py).
 // Loaded after player.js on whatif.html; it only reads the player's state and draws on its own layer,
 // so index.html / player.js are unchanged. URL: whatif.html?case=1..4 (plus the player's own options).
 "use strict";
 
 const WF = window.NOS_WHATIF;
 const WIDX = window.NOS_WHATIF_INDEX || [];
-const PAUSE_S = 2.8;                       // the plan stops at the breakdown while NOS replans
+const PAUSE_S = 2.8;                       // the plan stops at the breakdown while Delivello replans
 const wcanvas = document.getElementById("wf-layer");
 const wctx = wcanvas.getContext("2d");
 // wLastT starts at the player's start position, so even a long first frame (slow load) still
@@ -23,7 +23,7 @@ function clock(min) {
   return `Day ${day}, ${String(Math.floor(mm / 60)).padStart(2, "0")}:${String(mm % 60).padStart(2, "0")}`;
 }
 
-// ---- side panel: planned vs no reaction vs NOS replan
+// ---- side panel: planned vs no reaction vs Delivello replan
 function compareCard() {
   const rows = [["Planned (no breakdown)", WF.score_planned, "plan"], ["No reaction", WF.score_no_reaction, "bad"],
                 ["Delivello replan", WF.score_nos, "good"]];

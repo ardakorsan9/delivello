@@ -1,7 +1,7 @@
 """Check that the API key in .env works (uses the unlimited Validate endpoint).
 
 Usage:  uv run python scripts/check_team.py
-        uv run python scripts/check_team.py --register "NOS"
+        uv run python scripts/check_team.py --register "Delivello"
 """
 
 from __future__ import annotations

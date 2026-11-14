@@ -1,4 +1,4 @@
-# NOS dispatch replay (demo video)
+# Delivello dispatch replay (demo video)
 
 An offline player for the final plans: map, trucks driving along the real roads, a short fading
 trail, breaks and rests, and KPIs. No server and no internet are needed.
@@ -56,8 +56,8 @@ A blue dot marks refrigerated trucks, an orange dot hazmat. Colours are the CSS 
 of `style.css`.
 
 ## Emergency what-if page (`whatif.html`)
-A truck breaks down mid-plan and NOS replans the rest. Same map and player; `whatif.js` and `whatif.css`
-add the alert, the breakdown marker, the helper trucks and the "planned / no reaction / NOS replan"
+A truck breaks down mid-plan and Delivello replans the rest. Same map and player; `whatif.js` and `whatif.css`
+add the alert, the breakdown marker, the helper trucks and the "planned / no reaction / Delivello replan"
 comparison. `index.html` and `player.js` are not changed by it.
 
 ```bash

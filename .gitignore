@@ -19,3 +19,7 @@ Thumbs.db
 
 # generated demo data (scripts/build_web.py); the basemap web/data/europe.js is committed
 web/data/scenario_*.js
+
+# generated what-if cases (scripts/disruption.py build); web/data/whatif_roads.js is committed
+web/data/whatif_[0-9]*.js
+web/data/whatif_index.js

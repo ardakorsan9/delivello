@@ -12,35 +12,52 @@
   <div class="kpi"><label>Scenario</label><b id="k-scen">–</b></div>
   <div class="kpi"><label>Clock</label><b id="k-clock">–</b></div>
   <div class="kpi"><label>Delivered</label><b id="k-deliv">–</b></div>
-  <div class="kpi"><label>Km driven</label><b id="k-km">–</b></div>
   <div class="kpi"><label>Empty km</label><b id="k-empty">–</b></div>
-  <div class="kpi score"><label>Score <small>API-verified</small></label><b id="k-score">–</b></div>
+  <div class="kpi score"><label>Score</label><b id="k-score">–</b></div>
 </header>
 
 <main>
   <canvas id="map"></canvas>
+  <div id="zoom" title="Mouse wheel: zoom · drag: move · double-click or 0: reset">
+    <button id="z-in" aria-label="Zoom in">+</button>
+    <button id="z-out" aria-label="Zoom out">−</button>
+    <button id="z-reset" aria-label="Reset zoom">⟲</button>
+    <span id="zoom-level">1.0×</span>
+  </div>
   <div id="title-card" class="hidden"><div><h1 id="tc-title"></h1><p id="tc-sub"></p></div></div>
+
+  <div id="results" class="hidden">
+    <div class="rc">
+      <p class="eyebrow" id="rc-scen"></p>
+      <h1>Every delivery. A clearer picture.</h1>
+      <div class="rc-hero"><b id="rc-score"></b><span>/ 1,000</span></div>
+      <p class="rc-ceil" id="rc-ceil"></p>
+      <div class="rc-tiles">
+        <div><b id="rc-deliv"></b><span>orders delivered</span></div>
+        <div><b id="rc-empty"></b><span>of the km driven empty</span></div>
+        <div><b id="rc-co2"></b><span>CO₂ score</span></div>
+      </div>
+    </div>
+  </div>
+
   <aside id="side">
     <section>
-      <h3>From naive to optimised</h3>
-      <div id="stages"></div>
+      <h3>Score breakdown</h3>
+      <div class="comp"><span>Delivered</span><div><i id="c-F"></i></div><b id="c-F-v">–</b></div>
+      <div class="comp"><span>Cost</span><div><i id="c-C"></i></div><b id="c-C-v">–</b></div>
+      <div class="comp"><span>Loaded km</span><div><i id="c-R"></i></div><b id="c-R-v">–</b></div>
+      <div class="comp"><span>CO₂</span><div><i id="c-G"></i></div><b id="c-G-v">–</b></div>
     </section>
     <section>
-      <h3>How close to the best possible?</h3>
-      <div id="bound"></div>
-    </section>
-    <section>
-      <h3>Search progress <small>ALNS best score</small></h3>
-      <canvas id="spark" width="320" height="90"></canvas>
+      <h3>Proven ceiling</h3>
+      <div class="ceil"><div><i id="ceil-bar"></i></div><b id="ceil-v">–</b></div>
+      <p class="note" id="ceil-note"></p>
     </section>
     <section class="legend">
-      <h3>Legend</h3>
-      <div><img src="assets/truck_standard.svg" alt=""> standard</div>
-      <div><img src="assets/truck_refrigerated.svg" alt=""> refrigerated</div>
-      <div><img src="assets/truck_hazmat.svg" alt=""> hazmat</div>
-      <div><img src="assets/cargo.svg" alt="" class="sq"> cargo on board</div>
-      <div><i class="ring brk"></i> break 45 min <i class="ring rst"></i> daily rest 11 h</div>
-      <div><i class="line solid"></i> loaded km <i class="line dash"></i> empty km (recent trail)</div>
+      <h3>Map</h3>
+      <div id="fuel-legend" class="fuels"></div>
+      <div class="keys"><span><i class="line solid"></i> loaded</span><span><i class="line dash"></i> empty</span>
+        <span><i class="ring brk"></i> break</span><span><i class="ring rst"></i> rest</span></div>
     </section>
   </aside>
 </main>
@@ -53,8 +70,9 @@
     <option value="20">20 s</option><option value="30">30 s</option><option value="45" selected>45 s</option>
     <option value="60">60 s</option><option value="120">120 s</option>
   </select>
-  <button id="b-tour" title="T: all four scenarios in 2 minutes">Tour 2:00</button>
-  <span class="hint">Space play · ←/→ seek · 1–4 scenario · T tour · R restart · H hide controls</span>
+  <button id="b-tour" title="T: Competitive in 70 s (?tour=full: all four in 2:00)">Tour 1:10</button>
+  <button id="b-theme" title="D: light / dark">Light / Dark</button>
+  <span class="hint">Space play · ←/→ seek · 1–4 scenario · T tour · R restart · D theme · H hide · 0 reset zoom</span>
 </footer>
 
 <script src="data/europe.js"></script>
@@ -64,5 +82,6 @@
 <script src="data/scenario_big.js"></script>
 <script src="data/scenario_competitive.js"></script>
 <script src="player.js"></script>
+<script src="types.js"></script>
 </body>
 </html>

@@ -166,7 +166,7 @@ function renderBase(d, city) {
     ring.forEach(([lon, lat], i) => { const [x, y] = project(lon, lat); i ? g.lineTo(x, y) : g.moveTo(x, y); });
     g.closePath(); g.fill(); g.stroke();
   }
-  g.font = "12px system-ui, sans-serif"; g.textBaseline = "middle";
+  g.font = "12px Montserrat, system-ui, sans-serif"; g.textBaseline = "middle";
   const labels = Object.values(city).map((c) => {          // sample every label's background first
     const x = c.xy[0] + 6, y = c.xy[1] - 8, w = g.measureText(c.name).width;
     return { c, x, y, sea: x + w / 2 >= 0 && x + w / 2 < W && y >= 0 && y < H && onSea(g, x + w / 2, y) };
@@ -177,7 +177,7 @@ function renderBase(d, city) {
   }
   // attribution on a small panel-coloured plate so it reads over land and sea alike
   const credit = "Roads © OpenStreetMap contributors (OSRM) · Map: Natural Earth";
-  g.font = "11px system-ui, sans-serif"; g.textBaseline = "bottom";
+  g.font = "11px Montserrat, system-ui, sans-serif"; g.textBaseline = "bottom";
   const cw = g.measureText(credit).width;
   g.globalAlpha = 0.85; g.fillStyle = C("--panel"); g.fillRect(4, H - 24, cw + 12, 20); g.globalAlpha = 1;
   g.fillStyle = C("--muted"); g.fillText(credit, 10, H - 8);
@@ -399,7 +399,7 @@ function drawFps() {
   const now = performance.now();
   if (now - fpsT >= 500) { fpsV = (1000 * fpsN) / (now - fpsT); fpsN = 0; fpsT = now; }
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  ctx.fillStyle = COL.text; ctx.font = "14px system-ui"; ctx.textBaseline = "top";
+  ctx.fillStyle = COL.text; ctx.font = "14px Montserrat, system-ui"; ctx.textBaseline = "top";
   ctx.fillText(`${fpsV.toFixed(0)} fps`, W - 70, 10);
 }
 

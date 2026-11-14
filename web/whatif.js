@@ -67,12 +67,12 @@ function wDraw(t, now) {
   // broken truck: red pulsing ring and a cross
   wctx.strokeStyle = `rgba(229, 57, 53, ${0.55 + 0.45 * pulse})`; wctx.lineWidth = 4;
   wctx.beginPath(); wctx.arc(city[0], city[1], 26 + 6 * pulse, 0, 7); wctx.stroke();
-  wctx.fillStyle = "#e53935"; wctx.font = "bold 22px system-ui"; wctx.textAlign = "center"; wctx.textBaseline = "middle";
+  wctx.fillStyle = "#e53935"; wctx.font = "bold 22px Montserrat, system-ui"; wctx.textAlign = "center"; wctx.textBaseline = "middle";
   wctx.fillText("⚠", city[0], city[1] - 44);
   // cargo still waiting in the breakdown city
   const waiting = rescuePick.filter((p) => p.t > t).length;
   if (waiting) {
-    wctx.fillStyle = "#e53935"; wctx.font = "bold 13px system-ui";
+    wctx.fillStyle = "#e53935"; wctx.font = "bold 13px Montserrat, system-ui";
     wctx.fillText(`${waiting} order${waiting > 1 ? "s" : ""} waiting for pickup`, city[0], city[1] + 44);
   }
   // helper trucks: amber rings for a while after the replan

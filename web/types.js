@@ -39,7 +39,7 @@
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     ctx.textAlign = "center"; ctx.textBaseline = "middle";
     const r = Math.max(8, S.truckSize * 0.26);
-    ctx.font = `bold ${Math.round(r * 1.25)}px system-ui, "Segoe UI Symbol", sans-serif`;
+    ctx.font = `bold ${Math.round(r * 1.25)}px Montserrat, system-ui, "Segoe UI Symbol", sans-serif`;
     for (const tr of S.trucks) {
       const k = TYPE[tr.type];
       if (!k) continue;
@@ -52,6 +52,9 @@
     }
     ctx.restore();
   }
+
+  // canvas text uses the font only once it is loaded: redraw the map labels when Montserrat is ready
+  if (document.fonts) document.fonts.load("12px Montserrat").then(() => { if (S) resize(); });
 
   const playerRender = render;
   render = function (frac) {           // eslint-disable-line no-global-assign

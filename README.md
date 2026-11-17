@@ -73,6 +73,10 @@ tests/          tests
 data/           downloaded scenarios (git-ignored, regenerate with fetch_data.py)
 ```
 
+## Team
+Built in 24 hours at NOI Hackathon SFSCON Edition 2026 (Bolzano) by team Delivello:
+Arda Onur Kırık (optimization and code), Boldizsár and István.
+
 ## License
 
 GNU Affero General Public License v3.0 (AGPL-3.0) — see [LICENSE](LICENSE).
